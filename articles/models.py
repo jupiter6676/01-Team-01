@@ -11,17 +11,18 @@ class Article(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    image = ProcessedImageField(
-        upload_to="images/",
-        blank=True,
-        processors=[ResizeToFill(1200, 960)],
-        format="JPEG",
-        options={"quality": 80},
-    )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     like_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="like_articles"
     )
+
+    def __str__(self):
+        return self.title
+
+
+class Photo(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, null=True)
+    image = models.ImageField(upload_to="images/", blank=True, null=True)
 
 
 class Comment(models.Model):

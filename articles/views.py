@@ -2,8 +2,8 @@ from xml.etree.ElementTree import Comment
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Article
-from .forms import ArticleForm, CommentForm
+from .models import *
+from .forms import *
 
 # Create your views here.
 def index(request):
@@ -16,22 +16,30 @@ def index(request):
     return render(request, "articles/index.html", context)
 
 
-@login_required
 def create(request):
     if request.method == "POST":
         article_form = ArticleForm(request.POST, request.FILES)
-        if article_form.is_valid():
+        photo_form = PhotoForm(request.POST, request.FILES)
+        images = request.FILES.getlist("image")
+        if article_form.is_valid() and photo_form.is_valid():
             article = article_form.save(commit=False)
             article.user = request.user
-            article.save()
-            messages.success(request, "글 작성 완료.")
+            if len(images):
+                for image in images:
+                    image_instance = Photo(article=article, image=image)
+                    article.save()
+                    image_instance.save()
+            else:
+                article.save()
             return redirect("articles:index")
     else:
         article_form = ArticleForm()
+        photo_form = PhotoForm()
     context = {
         "article_form": article_form,
+        "photo_form": photo_form,
     }
-    return render(request, "articles/create.html", context=context)
+    return render(request, "articles/create.html", context)
 
 
 def detail(request, pk):
@@ -64,11 +72,7 @@ def update(request, pk):
         context = {"article_form": article_form}
         return render(request, "articles/form.html", context)
     else:
-        # 작성자가 아닐 때
-        # (1) 403 에러메시지를 던져버린다.
-        # from django.http import HttpResponseForbidden
-        # return HttpResponseForbidden()
-        # (2) flash message 활용!
+
         messages.warning(request, "작성자만 수정할 수 있습니다.")
         return redirect("articles:detail", article.pk)
 
