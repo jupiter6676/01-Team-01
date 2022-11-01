@@ -5,6 +5,7 @@ django-appconf==1.0.5
 django-bootstrap5==22.1
 django-extensions==3.2.1
 django-imagekit==4.1.0
+django-mathfilters==1.0.0
 django-widget-tweaks==1.4.12
 gunicorn==20.1.0
 pilkit==2.0
