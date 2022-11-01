@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load django_bootstrap5 %}
+
+{% block css %}
+{% endblock css%}
+
+{% block body %}
+
+  <div class="row">
+    {% for article in articles %}
+      <div class="col-4 my-3">
+        <div class="card">
+          {% if article.image %}
+            <img src="{{ article.image.url }}" class="card-img-top" alt="...">
+          {% else %}
+            <img src="https://dummyimage.com/1200x960/000000/c4c4c4" class="card-img-top">
+          {% endif %}
+          <div class="card-body">
+            <p class="text-muted">
+              <a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.username }}</a>
+            </p>
+            <h5 class="card-title">{{ article.title }}</h5>
+            <span>{{ article.like_users.count }}</span></button>
+
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  <!-- {% if request.user.is_authenticated %} -->
+  <a class="btn btn-primary my-3 float-right" href="{% url 'articles:create' %}">글쓰기</a>
+{% endif %}
+</div>
+{% endblock body %}
