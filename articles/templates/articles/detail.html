@@ -20,12 +20,14 @@
   <div class="card-header">
     <div id="post_{{ post.id }}" class="carousel slide" data-ride="carousel">
       <div class="carousel-inner">
-        {% for image in post.image_set.all %}
+        {% for photo in article.photo_set.all %}
+        {% if photo.image %}
         <div class="carousel-item {% if forloop.counter == 1 %} active {% endif %}">
-          <img src="{{ article.image.url }}" class="card-img-top" 
-               alt="{{ article.image }}">
+          <img src="{{photo.image.url}}" width="250px">
         </div>
+        {% endif %}
         {% endfor %}
+      
       </div>
       <a class="carousel-control-prev" href="#article_{{ article.id }}" 
          role="button" data-slide="prev">
