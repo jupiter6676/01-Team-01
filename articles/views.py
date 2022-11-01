@@ -90,6 +90,31 @@ def comment_create(request, pk):
         comment.save()
     return redirect("articles:detail", article.pk)
 
+@login_required
+def comment_delete(request, article_pk, comment_pk):
+    if request.user.is_authenticated:
+        comment = Comment.objects.get(pk=comment_pk)
+        if request.user == comment.user:
+            comment.delete()
+    return redirect('articles:detail', article_pk)
+
+
+# @login_required
+# def comment_update(request, article_pk, comment_pk):
+#     comment = Comment.objects.get(pk=comment_pk)
+#     comment_form = CommentForm(instance=comment)
+#     if request.user != comment.user:
+#         from django.http import HttpResponseForbidden
+#         return HttpResponseForbidden()
+#     if request.method == "POST":
+#         form = CommentForm(request.POST, instance=comment)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('articles:detail', article_pk)
+#     else:
+#         form = CommentForm(instance=comment)
+#     return render('articles:comment_update', {"form": form})
+
 
 def like(request, pk):
     article = Article.objects.get(pk=pk)
