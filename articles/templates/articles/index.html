@@ -6,7 +6,7 @@
 {% block css %}
 {% endblock css%}
 
-{% block body %}
+{% block content %}
 
   <div class="row">
     {% for article in articles %}
@@ -28,8 +28,8 @@
       </div>
     </div>
   {% endfor %}
-  <!-- {% if request.user.is_authenticated %} -->
+
   <a class="btn btn-primary my-3 float-right" href="{% url 'articles:create' %}">글쓰기</a>
-{% endif %}
+
 </div>
-{% endblock body %}
+{% endblock content %}
