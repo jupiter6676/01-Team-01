@@ -1,13 +1,45 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
+{% load mathfilters %}
 {% load static %}
 
 {% block content %} 
-<h1>{{ article.title }}</h1>
-<p>{{ article.pk }}번 게시글</p>
-<p> {{ article.update_counter }}</p>
-<p>{{ article.created_at|date:"SHORT_DATETIME_FORMAT" }} | {{ article.updated_at|date:"y-m-d D" }}</p>
+  <h1>{{ article.title }}</h1>
+  <p>{{ article.pk }}번 게시글</p>
+  <p> {{ article.update_counter }}</p>
+  <p>{{ article.created_at|date:"SHORT_DATETIME_FORMAT" }} | {{ article.updated_at|date:"y-m-d D" }}</p>
 
+  {% if request.user == article.user %}
+    <p><a href="{% url 'articles:update' article.pk %}">수정하기</a></p>
+  {% endif %}
+  <hr>
+
+
+  <p>{{ article.content }} </p>
+  
+  {% comment %} <div class="card" style="width: 18rem;">
+    <div class="card-header">
+      <div id="post_{{ post.id }}" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+          {% for photo in article.photo_set.all %}
+            {% if photo.image %}
+              <div class="carousel-item {% if forloop.counter == 1 %} active {% endif %}">
+                <img src="{{photo.image.url}}" width="250px">
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <a class="carousel-control-prev" href="#article_{{ article.id }}" 
+          role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#article_{{ article.id }}" 
+          role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
 
 {% if request.user == article.user %}
 <p>
@@ -27,28 +59,67 @@
         {% endif %}
         {% endfor %}
       </div>
-      <a class="carousel-control-prev" href="#article_{{ article.id }}" 
-         role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-      </a>
-      <a class="carousel-control-next" href="#article_{{ article.id }}" 
-         role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-      </a>
     </div>
-  </div> 
-  <span><a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.username }}</a></span>
+  </div> {% endcomment %}
+
+  <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="true">
+    <div class="carousel-indicators">
+      {% for photo in article.photo_set.all %}
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ forloop.counter|sub:1|mod:photo_cnt }}" class="{% if forloop.counter == 1 %} active {% endif %}" aria-current="true" aria-label="Slide {{ forloop.counter|mod:photo_cnt }}"></button>
+      {% endfor %}
+    </div>
+    <div class="carousel-inner">
+      {% for photo in article.photo_set.all %}
+        <div class="carousel-item {% if forloop.counter == 1 %} active {% endif %}">
+          <img src="{{ photo.image.url }}" class="d-block w-100" alt="{{ photo.image }}">
+        </div>
+      {% endfor %}
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+
+  <span> <a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.username }}</a></span>
+
   <p>{{ article.title }}</p>
   <p>{{ article.content }} </p>
   <span>
     {% if request.user.is_authenticated %}
+      <button type="button" class="btn btn-primary"><a class="text-white text-decoration-none" href="{% url 'articles:like' article.pk %}">❤</a> <span>{{ article.like_users.count }}</span></button>
+    {% else %}
+      <button type="button" class="btn btn-danger me-2 disabled">로그인 필요</button><button type="button" class="btn btn-primary" disabled>❤ <span>{{ article.like_users.count }}</button>
+    {% endif %}
+  </span>
+
+{% comment %}
+  <hr>
+  <h4 class="my-3">댓글</h4>
+  {% if request.user.is_authenticated %}
+  <form action="{% url 'articles:comment_create' article.pk %}" method="POST">
+    {% csrf_token %}
+    {% bootstrap_form comment_form layout='floating'%}
+    {% bootstrap_button button_type="submit" content="OK" %}
+  </form>
+  {% endif %}
+
+  {% for comment in comments %}
+    <p> {{ comment.user.username }} | {{ comment.content }}</p>
+    <hr>    
+  {% endfor %}
+{% endblock content %}
     <button type="button" class="btn btn-primary"><a class="text-white text-decoration-none" href="{% url 'articles:like' article.pk %}">❤</a> <span>{{ article.like_users.count }}</span></button>
     {% else %}
     <button type="button" class="btn btn-danger me-2 disabled">로그인 필요</button><button type="button" class="btn btn-primary" disabled>❤ <span>{{ article.like_users.count }}</button>
     {% endif %}
   </span>
+{% endcomment %}
 
 <hr>
 <h5 class="my-3">댓글 ({{ comments|length }})</h5>
