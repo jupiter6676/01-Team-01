@@ -12,6 +12,7 @@
 <form action="" method="POST" enctype="multipart/form-data">
   {% csrf_token %}
   {% bootstrap_form article_form %}
+  {% bootstrap_form photo_form %}
   {% bootstrap_button button_type="submit" content="OK" %}
 </form>
 {% endblock content %}
