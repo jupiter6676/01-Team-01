@@ -45,10 +45,12 @@ def create(request):
 def detail(request, pk):
     article = Article.objects.get(pk=pk)
     comment_form = CommentForm()
+    
     context = {
         "article": article,
         "comments": article.comment_set.all(),
         "comment_form": comment_form,
+        "photo_cnt": article.photo_set.count(),
     }
     return render(request, "articles/detail.html", context)
 
