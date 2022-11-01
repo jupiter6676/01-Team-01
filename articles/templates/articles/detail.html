@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
+{% load static %}
 
 {% block content %} 
 <h1>{{ article.title }}</h1>
@@ -14,9 +15,7 @@
 </p>
 {% endif %}
 <hr>
-<p>{{ article.content }} </p>
-{% if article.image %}
-<div class="card" style="width: 18rem;">
+<p>{{ article.content }} </p> 
   <div class="card-header">
     <div id="post_{{ post.id }}" class="carousel slide" data-ride="carousel">
       <div class="carousel-inner">
@@ -27,7 +26,6 @@
         </div>
         {% endif %}
         {% endfor %}
-      
       </div>
       <a class="carousel-control-prev" href="#article_{{ article.id }}" 
          role="button" data-slide="prev">
@@ -40,29 +38,63 @@
         <span class="sr-only">Next</span>
       </a>
     </div>
-   
   </div> 
-  <span> <a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.username }}</a></span>
+  <span><a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.username }}</a></span>
   <p>{{ article.title }}</p>
   <p>{{ article.content }} </p>
-  <span>{% if request.user.is_authenticated %}
+  <span>
+    {% if request.user.is_authenticated %}
     <button type="button" class="btn btn-primary"><a class="text-white text-decoration-none" href="{% url 'articles:like' article.pk %}">❤</a> <span>{{ article.like_users.count }}</span></button>
     {% else %}
     <button type="button" class="btn btn-danger me-2 disabled">로그인 필요</button><button type="button" class="btn btn-primary" disabled>❤ <span>{{ article.like_users.count }}</button>
-    {% endif %}</span>
+    {% endif %}
+  </span>
 
 <hr>
-<h4 class="my-3">댓글</h4>
+<h5 class="my-3">댓글 ({{ comments|length }})</h5>
 {% if request.user.is_authenticated %}
 <form action="{% url 'articles:comment_create' article.pk %}" method="POST">
   {% csrf_token %}
-  {% bootstrap_form comment_form layout='floating'%}
-  {% bootstrap_button button_type="submit" content="OK" %}
+  {% bootstrap_form comment_form %}
+  <div class="d-flex justify-content-end">
+    <input class="btn btn-sm btn-outline-primary" type="submit" value="등록">
+  </div>
 </form>
+{% else %}
+<a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
 {% endif %}
-
+<hr>
 {% for comment in comments %}
-  <p> {{ comment.user.username }} | {{ comment.content }}</p>
-  <hr>    
-{% endfor %}
+<div class="mt-3 d-flex justify-content-between">
+  <div>
+    <p style="font-size: 0.7rem; margin-bottom: 0rem;">{{ comment.user }} | {{ comment.created_at|date:'Y-m-d H:i' }}</p>
+      <p style="margin-bottom: 0rem;">{{ comment.content }}</p>
+        </div>
+        <div class="d-flex justify-content-end mt-2">
+        {% if user == comment.user %}
+        <!-- 댓글 수정 버튼 -->
+        {% comment %} <form action="{% url 'articles:comment_update' article.pk comment.pk %}" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% bootstrap_form comment_form %}
+          <input type="submit" value="수정">
+          <button class="btn btn-none border-0 p-0 me-2">
+            <img src="{% static 'image/edit.png' %}" style="width: 20px">
+          </button>
+        </form> {% endcomment %}
+        <!-- 댓글 삭제 버튼 -->
+        <form action="{% url 'articles:comment_delete' article.pk comment.pk %}" method="POST" class="d-inline mt-1">
+          {% csrf_token %}
+          <button class="btn btn-none border-0 p-0" type="submit">
+            <img src="{% static 'images/bin.png' %}" style="width: 24px">
+          </button>
+          {% comment %} <input class="btn btn-sm btn-outline-danger" type="submit" value="삭제"> {% endcomment %}
+        </form>
+      {% else %}
+      {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <p>댓글이 아직 없어요.</p>
+  {% endfor %}
+</div>
 {% endblock content %}
