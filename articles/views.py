@@ -22,69 +22,21 @@ def create(request):
         article_form = ArticleForm(request.POST, request.FILES)
         if article_form.is_valid():
             article = article_form.save(commit=False)
-            # 로그인한 유저 => 작성자네!
             article.user = request.user
             article.save()
-            messages.success(request, "글 작성이 완료되었습니다.")
+            messages.success(request, "글 작성 완료.")
             return redirect("articles:index")
     else:
         article_form = ArticleForm()
-    context = {"article_form": article_form}
+    context = {
+        "article_form": article_form,
+    }
     return render(request, "articles/create.html", context=context)
 
 
 def detail(request, pk):
-    # 특정 글을 가져온다.
     article = Article.objects.get(pk=pk)
     comment_form = CommentForm()
-    # template에 객체 전달
-    context = {
-        "article": article,
-        "comments": article.comment_set.all(),
-        "comment_form": comment_form,
-    }
-    return render(request, "articles/detail.html", context)
-
-
-# 요청 정보를 받아서..
-def index(request):
-    # 게시글을 가져와서..
-    articles = Article.objects.order_by("-pk")
-    # Template에 전달한다.
-    context = {"articles": articles}
-    return render(request, "articles/index.html", context)
-
-
-# def new(request):
-#     article_form = ArticleForm()
-#     context = {
-#         'article_form': article_form
-#     }
-#     return render(request, 'articles/new.html', context=context)
-
-
-@login_required
-def create(request):
-    if request.method == "POST":
-        article_form = ArticleForm(request.POST, request.FILES)
-        if article_form.is_valid():
-            article = article_form.save(commit=False)
-            # 로그인한 유저 => 작성자네!
-            article.user = request.user
-            article.save()
-            messages.success(request, "글 작성이 완료되었습니다.")
-            return redirect("articles:index")
-    else:
-        article_form = ArticleForm()
-    context = {"article_form": article_form}
-    return render(request, "articles/form.html", context=context)
-
-
-def detail(request, pk):
-    # 특정 글을 가져온다.
-    article = Article.objects.get(pk=pk)
-    comment_form = CommentForm()
-    # template에 객체 전달
     context = {
         "article": article,
         "comments": article.comment_set.all(),

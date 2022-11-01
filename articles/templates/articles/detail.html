@@ -7,11 +7,7 @@
 <p> {{ article.update_counter }}</p>
 <p>{{ article.created_at|date:"SHORT_DATETIME_FORMAT" }} | {{ article.updated_at|date:"y-m-d D" }}</p>
 
-{% if request.user.is_authenticated %}
-<button type="button" class="btn btn-primary"><a class="text-white text-decoration-none" href="{% url 'articles:like' article.pk %}">❤</a> <span>{{ article.like_users.count }}</span></button>
-{% else %}
-<button type="button" class="btn btn-danger me-2 disabled">로그인 필요</button><button type="button" class="btn btn-primary" disabled>❤ <span>{{ article.like_users.count }}</button>
-{% endif %}
+
 {% if request.user == article.user %}
 <p>
   <a href="{% url 'articles:update' article.pk %}">수정하기</a>
@@ -31,12 +27,12 @@
         </div>
         {% endfor %}
       </div>
-      <a class="carousel-control-prev" href="#post_{{ post.id }}" 
+      <a class="carousel-control-prev" href="#article_{{ article.id }}" 
          role="button" data-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="sr-only">Previous</span>
       </a>
-      <a class="carousel-control-next" href="#post_{{ post.id }}" 
+      <a class="carousel-control-next" href="#article_{{ article.id }}" 
          role="button" data-slide="next">
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
         <span class="sr-only">Next</span>
@@ -48,7 +44,10 @@
   <p>{{ article.title }}</p>
   <p>{{ article.content }} </p>
   <span>{% if request.user.is_authenticated %}
-    <button type="button" class="btn btn-primary"><a class="text-white text-decoration-none" href="{% url 'articles:like' article.pk %}">❤</a> <span>{{ article.like_users.count }}</span></button></span>
+    <button type="button" class="btn btn-primary"><a class="text-white text-decoration-none" href="{% url 'articles:like' article.pk %}">❤</a> <span>{{ article.like_users.count }}</span></button>
+    {% else %}
+    <button type="button" class="btn btn-danger me-2 disabled">로그인 필요</button><button type="button" class="btn btn-primary" disabled>❤ <span>{{ article.like_users.count }}</button>
+    {% endif %}</span>
 
 <hr>
 <h4 class="my-3">댓글</h4>

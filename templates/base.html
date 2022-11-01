@@ -17,7 +17,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg bg-light">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="{% url 'articles:index' %}">
           <div class="d-flex align-items-center">
             <img src="{% static 'images/logo_test.png' %}" alt="logo" height="65" width="65">
             <span class="ms-3">여당</span>
@@ -50,7 +50,7 @@
    
     <!-- Content -->
     <div class="container my-5">
-      {% block body %}{% endblock body %}
+      {% block content %}{% endblock content %}
     </div>
 
     <!-- JS -->
