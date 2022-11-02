@@ -17,6 +17,7 @@
  
         <div class="col-lg-8 col-md-10">
             {% for tag in article.tags.all %}
+
                 <a href="#"><span>#{{ tag.name }}</span></a>
             {% endfor %}
         </div>
