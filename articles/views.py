@@ -22,7 +22,6 @@ def index(request):
 
 def create(request):
     if request.method == "POST":
-
         article_form = ArticleForm(request.POST, request.FILES)
         photo_form = PhotoForm(request.POST, request.FILES)
         images = request.FILES.getlist("image")
@@ -39,12 +38,12 @@ def create(request):
                     image_instance.save()
 
             else:
-
                 article.save()
                 for tag in tags:
                     tag = tag.strip()
                     article.tags.add(tag)
                     article.save()
+
             return redirect("articles:index")
     else:
         article_form = ArticleForm()
@@ -86,14 +85,21 @@ def delete(request, pk):
 def update(request, pk):
     article = Article.objects.get(pk=pk)
     photos = Photo.objects.filter(article_id=article.pk)
+    tags_ = article.tags.all()  # 기존에 있었던 태그(삭제)
+    
+    if tags_:
+        for tag in tags_:
+            tag.delete()
 
     if request.method == "POST":
         # POST : input 값 가져와서, 검증하고, DB에 저장
         article_form = ArticleForm(request.POST, request.FILES, instance=article)
         photo_form = PhotoForm(request.POST, request.FILES)
         images = request.FILES.getlist("image")
+        tags = request.POST.get("tags", "").split(",")
 
         # Article.objects.filter(record_Id=1).update(city=None) #잔여물
+        
 
         for photo in photos:
             if photo.image:
@@ -109,6 +115,11 @@ def update(request, pk):
                     image_instance.save()
             else:
                 article.save()
+                for tag in tags:
+                    tag = tag.strip()
+                    article.tags.add(tag)
+                    article.save()
+
             return redirect("articles:index")
 
     else:
