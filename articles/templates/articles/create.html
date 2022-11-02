@@ -9,15 +9,16 @@
     <h1> 수정하기 </h1>
   {% endif %}
 
-  <form action="{% url 'articles:update' article.pk %}" method="POST" enctype="multipart/form-data">
+  <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {% bootstrap_form article_form %}
     {% bootstrap_form photo_form %}
     <label for="exampleFormControlInput1" class="form-label">태그 작성</label>
     <input type="text" class="form-control" name="tags" placeholder="각 태그는 (,)로 구분해주세요">
   
-      <div class="mt-2">
-    {% bootstrap_button button_type="submit" content="OK" %}</div>
+    <div class="mt-2">
+      {% bootstrap_button button_type="submit" content="OK" %}
+    </div>
   </form>
   </div>
 {% endblock content %}
