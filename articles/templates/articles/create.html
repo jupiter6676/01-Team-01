@@ -2,21 +2,22 @@
 {% load django_bootstrap5 %}
 
 {% block content %}
+<div class="container my-5">
   {% if request.resolver_match.url_name == 'create' %}
     <h1> 글쓰기 </h1>
   {% else %}
     <h1> 수정하기 </h1>
   {% endif %}
-  
+
   <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {% bootstrap_form article_form %}
     {% bootstrap_form photo_form %}
-    <div class = "form-group row">
-      <label for = "tags">태그 달기(,로 구분해주세요)</label>
-      <input type = "text" class = "form-control" name = "tags">
-    </div>
+    <label for="exampleFormControlInput1" class="form-label">태그 작성</label>
+    <input type="text" class="form-control" name="tags" placeholder="각 태그는 (,)로 구분해주세요">
+  
       <div class="mt-2">
     {% bootstrap_button button_type="submit" content="OK" %}</div>
   </form>
+  </div>
 {% endblock content %}
