@@ -12,8 +12,6 @@ from .forms import CustomUserChangeForm
 
 
 # Create your views here.
-def index(request):
-    return render(request, "accounts/index.html")
 
 
 def signup(request):
@@ -22,7 +20,7 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             auth_login(request, user)
-            return redirect("accounts:index")
+            return redirect("articles:index")
     else:
         form = CustomUserCreationForm()
     context = {"form": form}
