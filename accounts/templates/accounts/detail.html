@@ -1,55 +1,92 @@
 {% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
 
 {% block content %}
-  <h1>{{ user.pk }} : {{ user.username }}</h1>
-  {% if request.user == user %}
-    <a href="{% url 'accounts:update' request.user.pk %}" class="btn btn-primary">회원 수정</a>
-  {% endif %}
-  <div class="container mt-3 mb-3">
-    <h1>{{ user.username }}님의 프로필</h1>
-    <p>{{ user.email }}
-      |
-      {{ user.full_name }}
-    </p>
-    팔로우 :
-    {{ user.followings.count }}
-    | 팔로워 :
-    {{ user.follower.count }}<br>
-    {% if request.user.is_authenticated %}
-      {% if request.user != user %}
-        {% if request.user in user.followings.all %}
-          <form action="{% url 'accounts:follow' user.pk %}" method="POST">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-secondary">팔로우 취소</button>
-          </form>
-        {% else %}
-          <form action="{% url 'accounts:follow' user.pk %}" method="POST">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary">팔로우</button>
-          </form>
-        {% endif %}
-      {% endif %}
-    {% endif %}
-    <div class="col-6">
-      <h3>작성한 글</h3>
-      <p class="text-muted">{{ user.review_set.count }}개를 작성하였습니다.</p>
-      {% for article in user.review_set.all %}
-        <p>
-          {{ forloop.counter }}
-          <a href="{% url 'reviews:detail' article.pk %}">{{ article.title }}</a>
-        </p>
-      </div>
-    {% endfor %}
+  <h1 class="text-center my-5">
+    <span class="text-primary">{{ user.nickname }}</span>님의 페이지</h1>
 
-    <div class="col-6">
-      <h3>작성한 댓글</h3>
-      <p class="text-muted">{{ user.comment_set.count }}개를 작성하였습니다.</p>
-      {% for comment in user.comment_set.all %}
-        <p>
-          {{ forloop.counter }}
-          <a href="{% url 'accounts:detail' comment.article.pk %}">{{ comment.content }}</a>
+  <!-- 프로필 이미지, 닉네임, 유저네임, 소개글 -->
+  <div class="container d-grid p-3 rounded-4 border border-1 mb-5">
+    <div class="row row-cols-2 align-items-center">
+      <div class="col-3">
+        {% if user.profile.image %}
+        <img src="{{ user.profile.image.url }}" alt="" class="rounded-4 border border-1 w-100">
+        {% else %}
+          <img src="{% static 'images/dummy-image-square.jpg' %}" alt="" class="rounded-4 border border-1 w-100">
+        {% endif %}
+      </div>
+
+      <div class="col-9 p-3" style="height: 100%">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <h3 class="m-0 me-3">{{ user.nickname }}</h3>
+          </div>
+          <div>
+            <!-- 로그인 유저 == 회원 정보 페이지의 유저 -->
+            {% if request.user == user %}
+              <a href="{% url 'accounts:update' user.pk %}" class="btn btn-primary">회원 정보 수정</a>
+            <!-- 로그인 유저 -->
+            {% elif request.user.is_authenticated %}
+              <form id="follow-form" data-user-id="{{ user.pk }}">
+                {% csrf_token %}
+              
+                <!-- 로그인 한 유저가 이미 팔로잉 중일 때 -->
+                {% if request.user in user.followers.all %}
+                  <input class='btn btn-secondary' type="submit" value="언팔로우">
+                {% else %}
+                  <input class='btn btn-primary' type="submit" value="팔로우">
+                {% endif %}
+              </form>
+            {% endif %}
+          </div>
+        </div>
+        <hr>
+
+        <p class="text-muted m-0">
+          <span class="me-3">팔로잉 <span id="followings-count">{{ user.followings.all|length }}</span>명</span>
+          <span>팔로워 <span id="followers-count">{{ user.followers.all|length }}</span>명</span>
         </p>
       </div>
-    {% endfor %}
+    </div>
   </div>
 {% endblock content %}
+
+{% block script %}
+  <script>
+    const form = document.querySelector("#follow-form")
+    const csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value
+    form.addEventListener('submit', function (event) {
+      event.preventDefault()
+      const userId = event.target.dataset.userId
+
+      axios({
+        method: "post",
+        url: `/accounts/${userId}/follow/`,
+        headers: {
+          'X-CSRFToken': csrf_token
+        }
+      })
+      .then((response) => {
+        const followersCount = response.data.followers_count
+        const followingsCount = response.data.followings_count
+        const isFollowed = response.data.is_followed
+        const followBtn = document.querySelector('#follow-form > input[type=submit]')
+        if (isFollowed === true) {
+          followBtn.value = '언팔로우'
+          followBtn.classList.add('btn-secondary')
+          followBtn.classList.remove('btn-primary')
+        } else {
+          followBtn.value = '팔로우'
+          followBtn.classList.add('btn-primary')
+          followBtn.classList.remove('btn-secondary')
+        }
+
+        const followersCountTag = document.querySelector('#followers-count')
+        const followingsCountTag = document.querySelector('#followings-count')
+        followersCountTag.innerText = followersCount
+        followingsCountTag.innerText = followingsCount
+      })
+    })
+  </script>
+{% endblock script %}
