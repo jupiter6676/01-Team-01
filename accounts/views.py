@@ -8,6 +8,8 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from .forms import CustomUserChangeForm
 
 
 # Create your views here.
@@ -146,3 +148,17 @@ def profile(request):
     }
 
     return render(request, 'accounts/profile.html', context)
+
+
+def update(request, pk):
+    if request.method == "POST":
+        form = CustomUserChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect("articles:index")
+    else:
+        form = CustomUserChangeForm(instance=request.user)
+    context = {
+        "form": form,
+    }
+    return render(request, "accounts/update.html", context)
