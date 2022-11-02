@@ -1,14 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ user.pk }} : {{ user.username }}</h1>
-{% if request.user == user %}
-    <a href="{% url 'accounts:update' %}">회원 수정</a>
-    <form action="{% url 'accounts:delete' %}" method="POST">
-        {% csrf_token %}
-        <button class="btn btn-secondary">회원 탈퇴</button>
-        </form>
-        {% endif %}
+  <h1>{{ user.pk }} : {{ user.username }}</h1>
+  {% if request.user == user %}
+    <a href="{% url 'accounts:update' request.user.pk %}" class="btn btn-primary">회원 수정</a>
+  {% endif %}
   <div class="container mt-3 mb-3">
     <h1>{{ user.username }}님의 프로필</h1>
     <p>{{ user.email }}
@@ -22,9 +18,15 @@
     {% if request.user.is_authenticated %}
       {% if request.user != user %}
         {% if request.user in user.followings.all %}
-          <a class="btn btn-outline-secondary" href="{% url 'accounts:follow' user.pk %}">팔로우 취소</a>
+          <form action="{% url 'accounts:follow' user.pk %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary">팔로우 취소</button>
+          </form>
         {% else %}
-          <a class="btn btn-outline-primary" href="{% url 'accounts:follow' user.pk %}">팔로우</a>
+          <form action="{% url 'accounts:follow' user.pk %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">팔로우</button>
+          </form>
         {% endif %}
       {% endif %}
     {% endif %}
@@ -45,7 +47,7 @@
       {% for comment in user.comment_set.all %}
         <p>
           {{ forloop.counter }}
-          <a href="{% url 'reviews:detail' comment.article.pk %}">{{ comment.content }}</a>
+          <a href="{% url 'accounts:detail' comment.article.pk %}">{{ comment.content }}</a>
         </p>
       </div>
     {% endfor %}

@@ -7,6 +7,7 @@ from django.conf import settings
 # Create your models here.
 class User(AbstractUser):
     nickname = models.CharField(max_length=20, unique=True, null=True)
+    followings = models.ManyToManyField('self', symmetrical=False, related_name='followers')
 
     def __str__(self):
         return self.email

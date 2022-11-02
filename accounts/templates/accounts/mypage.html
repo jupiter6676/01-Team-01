@@ -3,8 +3,7 @@
 
 {% block content %}
   <div class="list-group">
-    <!-- 회원 정보 수정 대신 프로필 사진, 닉네임 보여주기 -->
-    <a href="{% url 'accounts:profile' %}" class="list-group-item list-group-item-action">
+    <a href="{% url 'accounts:detail' request.user.pk %}" class="list-group-item list-group-item-action">
       <div class="d-flex align-items-center">
         {% if user.profile.image %}
           <img src="{{ user.profile.image.url }}" alt="{{ user.profile.image }}" class="rounded-2 border border-1" width="48px">
