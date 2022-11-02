@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+  <h1 class="text-center my-5">회원 정보 수정</h1>
+  <form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% bootstrap_form profile_form %}
+    {% bootstrap_form change_form %}
+
+    <div class="text-end">
+      <input type="submit" class="btn btn-primary" value="완료">
+    </div>
+  </form>
+{% endblock content %}

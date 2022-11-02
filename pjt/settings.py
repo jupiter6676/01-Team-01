@@ -48,7 +48,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "taggit.apps.TaggitAppConfig",
+    "taggit_templatetags2",
 ]
+
+TAGGIT_CASE_INSENSITIVE = True
+TAGGIT_LIMIT = 50
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -136,7 +141,7 @@ STATICFILES_DIRS = [
 ]
 
 STATICFILES_DIRS = [
-    BASE_DIR/'static',
+    BASE_DIR / "static",
 ]
 
 # Default primary key field type
@@ -146,3 +151,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 AUTH_USER_MODEL = "accounts.User"
+
+# 닉네임이 포함된 회원가입 폼을 사용
+ACCOUNT_SIGNUP_FORM_CLASS = "coplate.forms.SignupForm"
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
