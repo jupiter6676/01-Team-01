@@ -8,6 +8,9 @@
 
 {% block content %}
   <div class="row">
+  
+  
+
     {% for article in articles %}
       <div class="col-4 my-3">
         <a href="{% url 'articles:detail' article.pk %}">
@@ -24,6 +27,11 @@
               </p>
               <h5 class="card-title">{{ article.title }}</h5>
               <span>{{ article.like_users.count }}</span>
+              <div class="col-lg-8 col-md-10">
+                {% for tag in article.tags.all %}
+                    <a href="#"><span>#{{ tag.name }}</span></a>
+                {% endfor %}
+            </div>
             </div>
           </div>
         </a>

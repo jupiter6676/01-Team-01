@@ -1,9 +1,10 @@
 from xml.etree.ElementTree import Comment
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import *
 from .forms import *
+
 
 # Create your views here.
 def index(request):
@@ -18,19 +19,29 @@ def index(request):
 
 def create(request):
     if request.method == "POST":
+
         article_form = ArticleForm(request.POST, request.FILES)
         photo_form = PhotoForm(request.POST, request.FILES)
         images = request.FILES.getlist("image")
+        tags = request.POST.get("tags", "").split(",")
+
         if article_form.is_valid() and photo_form.is_valid():
             article = article_form.save(commit=False)
             article.user = request.user
+
             if len(images):
                 for image in images:
                     image_instance = Photo(article=article, image=image)
                     article.save()
                     image_instance.save()
+
             else:
+
                 article.save()
+                for tag in tags:
+                    tag = tag.strip()
+                    article.tags.add(tag)
+                    article.save()
             return redirect("articles:index")
     else:
         article_form = ArticleForm()
@@ -45,7 +56,7 @@ def create(request):
 def detail(request, pk):
     article = Article.objects.get(pk=pk)
     comment_form = CommentForm()
-    
+
     context = {
         "article": article,
         "comments": article.comment_set.all(),
@@ -90,13 +101,14 @@ def comment_create(request, pk):
         comment.save()
     return redirect("articles:detail", article.pk)
 
+
 @login_required
 def comment_delete(request, article_pk, comment_pk):
     if request.user.is_authenticated:
         comment = Comment.objects.get(pk=comment_pk)
         if request.user == comment.user:
             comment.delete()
-    return redirect('articles:detail', article_pk)
+    return redirect("articles:detail", article_pk)
 
 
 # @login_required
