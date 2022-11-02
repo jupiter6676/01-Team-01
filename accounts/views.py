@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .forms import CustomUserChangeForm
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -60,21 +61,30 @@ def detail(request, pk):
 @require_POST
 @login_required
 def follow(request, pk):
-    # 프로필에 해당하는 유저를 로그인한 유저가 팔로우 할 수 없음
     user = get_object_or_404(get_user_model(), pk=pk)
+    
+    # 프로필에 해당하는 유저를 로그인한 유저가 팔로우 할 수 없음
     if request.user == user:
         messages.warning(request, "스스로 팔로우 할 수 없습니다.")
-        return redirect("accounts:detail")
+        return redirect("accounts:detail", pk)
 
     # 팔로우 상태면, 팔로우 취소를 누르면 삭제
-    if request.user in user.followings.all():
-        user.followings.remove(request.user)
+    if request.user in user.followers.all():
+        user.followers.remove(request.user)
+        is_followed = False
     
+    # 팔로우 상태가 아니면, '팔로우'를 누르면 추가
     else:
-        # 팔로우 상태가 아니면, '팔로우'를 누르면 추가
-        user.followings.add(request.user)
+        user.followers.add(request.user)
+        is_followed = True
+
+    data = {
+        "followers_count": user.followers.count(),
+        "followings_count": user.followings.count(),
+        "is_followed": is_followed,
+    }
     
-    return redirect("accounts:detail", pk)
+    return JsonResponse(data)
 
 
 # 마이 페이지 (회원 정보로 이동, 비밀번호 변경, 로그아웃, 회원탈퇴)

@@ -19,8 +19,8 @@
       <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'articles:index' %}">
           <div class="d-flex align-items-center">
-            <img src="{% static 'images/logo_test.png' %}" alt="logo" height="65" width="65">
-            <span class="ms-3">여당</span>
+            <img src="{% static 'images/logo_test.png' %}" alt="logo" height="50px" width="50px">
+            <span class="ms-2">여당</span>
           </div>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,34 +31,61 @@
             <div>
               <ul class="navbar-nav">
                 <li class="nav-item">
-                  <a class="nav-link active" aria-current="page" href="#">홈</a>
+                  {% if request.resolver_match.url_name == 'index' %}
+                    <a class="nav-link active" href="{% url 'articles:index' %}">홈</a>
+                  {% else %}
+                    <a class="nav-link" href="{% url 'articles:index' %}">홈</a>
+                  {% endif %}
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="#">커뮤니티</a>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'accounts:signup' %}">회원가입</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'accounts:login' %}">로그인</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'accounts:logout' %}">로그아웃</a>
-                </li>
+
+                {% if request.user.is_authenticated %}
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:logout' %}">로그아웃</a>
+                  </li>
+                {% else %}
+                  <li class="nav-item">
+                    {% if request.resolver_match.url_name == 'signup' %}
+                      <a class="nav-link active" href="{% url 'accounts:signup' %}">회원가입</a>
+                    {% else %}
+                      <a class="nav-link" href="{% url 'accounts:signup' %}">회원가입</a>
+                    {% endif %}
+                  </li>
+                  <li class="nav-item">
+                    {% if request.resolver_match.url_name == 'login' %}
+                      <a class="nav-link active" href="{% url 'accounts:login' %}">로그인</a>
+                    {% else %}
+                      <a class="nav-link" href="{% url 'accounts:login' %}">로그인</a>
+                    {% endif %}
+                  </li>
+                {% endif %}
               </ul>
             </div>
 
             {% if request.user.is_authenticated %}
-              <div>
-                <ul class="navbar-nav">
+              <ul class="navbar-nav">
+                <div class="d-flex align-items-center">
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'accounts:mypage' request.user.pk %}">마이페이지</a>
+                    <a class="nav-link bi bi-bell" href="" style="width: 36px"></a>
                   </li>
+
                   <li class="nav-item">
-                    <a class="nav-link bi bi-bell" href="" style="width: 24px"></a>
+                    <a class="nav-link" href="{% url 'accounts:mypage' request.user.pk %}">
+                      <div class="d-flex align-items-center">
+                        <span class="me-2">{{ user.nickname }}</span>
+
+                        {% if user.profile.image %}
+                          <img src="{{ user.profile.image.url }}" alt="{{ user.profile.image }}" class="rounded-2 border border-1" width="36px">
+                        {% else %}
+                          <img src="{% static 'images/dummy-image-square.jpg' %}" alt="" class="rounded-2 border border-1" width="36px">
+                        {% endif %}
+                      </div>
+                    </a>
                   </li>
-                </ul>
-              </div>
+                </div>
+              </ul>
             {% endif %}
           </div>
         </div>
