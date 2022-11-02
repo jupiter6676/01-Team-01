@@ -2,8 +2,11 @@ from xml.etree.ElementTree import Comment
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .models import *
 from .forms import *
+import locale
+import json
 
 
 # Create your views here.
@@ -65,6 +68,17 @@ def detail(request, pk):
     }
     return render(request, "articles/detail.html", context)
 
+@login_required
+def delete(request, pk):
+    article = Article.objects.get(pk=pk)
+    if request.user != article.user:
+        return redirect("articles:index")
+    if request.method == "POST":
+        if request.user == article.user:
+            article.delete()
+            return redirect("articles:index")
+    else:
+        return redirect("articles:detail", pk)
 
 @login_required
 def update(request, pk):
@@ -83,11 +97,20 @@ def update(request, pk):
             # GET : Form을 제공
             article_form = ArticleForm(instance=article)
         context = {"article_form": article_form}
-        return render(request, "articles/form.html", context)
+        return render(request, "articles/create.html", context)
     else:
 
         messages.warning(request, "작성자만 수정할 수 있습니다.")
         return redirect("articles:detail", article.pk)
+
+
+def like(request, pk):
+    article = Article.objects.get(pk=pk)
+    if request.user in article.like_users.all():
+        article.like_users.remove(request.user)
+    else:
+        article.like_users.add(request.user)
+    return redirect("articles:detail", pk)
 
 
 @login_required
@@ -111,27 +134,47 @@ def comment_delete(request, article_pk, comment_pk):
     return redirect("articles:detail", article_pk)
 
 
-# @login_required
-# def comment_update(request, article_pk, comment_pk):
-#     comment = Comment.objects.get(pk=comment_pk)
-#     comment_form = CommentForm(instance=comment)
-#     if request.user != comment.user:
-#         from django.http import HttpResponseForbidden
-#         return HttpResponseForbidden()
-#     if request.method == "POST":
-#         form = CommentForm(request.POST, instance=comment)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('articles:detail', article_pk)
-#     else:
-#         form = CommentForm(instance=comment)
-#     return render('articles:comment_update', {"form": form})
-
-
-def like(request, pk):
-    article = Article.objects.get(pk=pk)
-    if request.user in article.like_users.all():
-        article.like_users.remove(request.user)
+@login_required
+def comment_update(request, article_pk, comment_pk):
+    comment = Comment.objects.get(pk=comment_pk)
+    comment_form = CommentForm(instance=comment)
+    if request.user != comment.user:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden()
+    if request.method == "POST":
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect('articles:detail', article_pk)
     else:
-        article.like_users.add(request.user)
-    return redirect("articles:detail", pk)
+        form = CommentForm(instance=comment)
+    return render('articles:comment_update', {"form": form})
+
+
+# @login_required
+# def comment_like(request, article_pk, comment_pk):
+#     comment = get_object_or_404(Comment, pk=comment_pk)
+#     if comment.like_users.filter(pk=request.user.pk).exists():  
+#   # if request.user in comment.like_users.all():
+#         comment.like_users.remove(request.user)
+#         is_comment_liked = False
+#     else:
+#         comment.like_users.add(request.user)
+#         is_comment_liked = True
+#     context = {
+#         "is_comment_liked": is_comment_liked, 
+#         "comment_like_count": comment.like_users.count(),
+#     }
+#     return JsonResponse(context)
+
+@login_required
+def comment_like(request, article_pk, comment_pk):
+    comment = get_object_or_404(Comment, pk=comment_pk)
+    article = Article.objects.get(pk=article_pk)
+    if request.user in comment.like_users.all():
+        comment.like_users.remove(request.user)
+    else:
+        comment.like_users.add(request.user)
+    return redirect("articles:detail", article_pk)
+
+

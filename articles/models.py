@@ -18,10 +18,15 @@ class Article(models.Model):
     like_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="like_articles"
     )
+    hits = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.title
-
+    
+    @property
+    def click(self):
+        self.hits +=1
+        self.save()
 
 class Photo(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, null=True)
@@ -29,7 +34,9 @@ class Photo(models.Model):
 
 
 class Comment(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="like_comments")
