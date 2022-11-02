@@ -27,28 +27,38 @@
           <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">홈</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">커뮤니티</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'accounts:signup' %}">회원가입</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'accounts:login' %}">로그인</a>
-            </li>
-          </ul>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <div>
+              <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="#">홈</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">커뮤니티</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'accounts:signup' %}">회원가입</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'accounts:login' %}">로그인</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'accounts:logout' %}">로그아웃</a>
+                </li>
+              </ul>
+            </div>
 
-          <div>
             {% if request.user.is_authenticated %}
-              <div class="bi bi-bell" style="width: 24px"></div>
-              <!-- User -->
-            {% else %}
-              <!-- Login -->
+              <div>
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:mypage' request.user.pk %}">마이페이지</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link bi bi-bell" href="" style="width: 24px"></a>
+                  </li>
+                </ul>
+              </div>
             {% endif %}
           </div>
         </div>

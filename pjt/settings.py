@@ -146,3 +146,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 AUTH_USER_MODEL = "accounts.User"
+
+# 닉네임이 포함된 회원가입 폼을 사용
+ACCOUNT_SIGNUP_FORM_CLASS = "coplate.forms.SignupForm"
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
