@@ -3,8 +3,10 @@
 {% load mathfilters %}
 {% load static %}
 
+
 {% block content %} 
   <h1>{{ article.title }}</h1>
+  <span> <a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.username }}</a></span>
   <p>{{ article.pk }}번 게시글</p>
   <p> {{ article.update_counter }}</p>
   <p>{{ article.created_at|date:"SHORT_DATETIME_FORMAT" }} | {{ article.updated_at|date:"y-m-d D" }}</p>
@@ -13,6 +15,16 @@
     <p><a href="{% url 'articles:update' article.pk %}">수정하기</a></p>
   {% endif %}
   <hr>
+
+  <br>
+  <div class = "row">
+ 
+    <div class="col-lg-8 col-md-10">
+        {% for tag in article.tags.all %}
+            <a href="#"><span>#{{ tag.name }}</span></a>
+        {% endfor %}
+    </div>
+
 
 
   <p>{{ article.content }} </p>
@@ -86,10 +98,8 @@
     </button>
   </div>
 
-  <span> <a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.username }}</a></span>
 
-  <p>{{ article.title }}</p>
-  <p>{{ article.content }} </p>
+
   <span>
     {% if request.user.is_authenticated %}
       <button type="button" class="btn btn-primary"><a class="text-white text-decoration-none" href="{% url 'articles:like' article.pk %}">❤</a> <span>{{ article.like_users.count }}</span></button>
@@ -97,6 +107,14 @@
       <button type="button" class="btn btn-danger me-2 disabled">로그인 필요</button><button type="button" class="btn btn-primary" disabled>❤ <span>{{ article.like_users.count }}</button>
     {% endif %}
   </span>
+
+  <div class="col-lg-8 col-md-10 mx-auto">
+    {% for tag in post.tags.all %}
+        <span class="badge badge-dark">
+        #{{ tag.name }}
+        </span>
+    {% endfor %}
+</div>
 
 {% comment %}
   <hr>
