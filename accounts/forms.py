@@ -24,10 +24,12 @@ class ProfileForm(ModelForm):
     class Meta:
         model = Profile()
         fields = ['intro', 'image']
-        fields = ("username",)
 
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = get_user_model()
-        fields = ["username", "first_name", "last_name", "email"]
+        fields = ["nickname"]
+        labels = {
+            "nickname": "닉네임",
+        }
