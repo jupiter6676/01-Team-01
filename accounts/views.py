@@ -7,6 +7,8 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from .forms import CustomUserChangeForm
 
 
 # Create your views here.
@@ -64,3 +66,17 @@ def follow(request, pk):
         # 팔로우 상태가 아니면, '팔로우'를 누르면 추가
         user.followings.add(request.user)
     return redirect("accounts:detail", pk)
+
+
+def update(request, pk):
+    if request.method == "POST":
+        form = CustomUserChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect("articles:index")
+    else:
+        form = CustomUserChangeForm(instance=request.user)
+    context = {
+        "form": form,
+    }
+    return render(request, "accounts/update.html", context)
