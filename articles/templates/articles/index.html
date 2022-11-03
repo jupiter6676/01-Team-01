@@ -25,13 +25,11 @@
               <span>좋아요 {{ article.like_users.count }}</span>
               <span>댓글 {{ article.comment_set.all.count }}</span>
               <span>조회수</span>
-              <h5 class="card-title">{{ article.title }}</h5>
-              <span>{{ article.like_users.count }}</span>
               <div class="col-lg-8 col-md-10">
                 {% for tag in article.tags.all %}
                     <a href="#"><span>#{{ tag.name }}</span></a>
                 {% endfor %}
-            </div>
+              </div>
             </div>
           </div>
         </a>
