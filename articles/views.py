@@ -12,7 +12,6 @@ from django.contrib.auth import get_user_model
 
 # Create your views here.
 def index(request):
-
     articles = Article.objects.order_by("-pk")
 
     context = {
@@ -65,10 +64,13 @@ def create(request):
 def detail(request, pk):
     article = Article.objects.get(pk=pk)
     comment_form = CommentForm()
+    comments = article.comment_set.filter(parent_comment=None)
+    replies= article.comment_set.exclude(parent_comment=None)
 
     context = {
         "article": article,
-        "comments": article.comment_set.all(),
+        "comments": comments,
+        "replies": replies,
         "comment_form": comment_form,
         "photo_cnt": article.photo_set.count(),
     }
@@ -160,26 +162,29 @@ def bookmark(request, pk):
     return redirect("articles:detail", pk)
 
 
-@xframe_options_exempt
-def comment_index(request, article_pk):
-    article = Article.objects.get(pk=article_pk)
-    comment_form = CommentForm()
-    context = {
-        "article": article,
-        "comments": article.comment_set.all(),
-        "comment_form": comment_form,
-    }
-    return render(request, "articles/comment_index.html", context)
+# @xframe_options_exempt
+# def comment_index(request, article_pk):
+#     article = Article.objects.get(pk=article_pk)
+#     comment_form = CommentForm()
+#     context = {
+#         "article": article,
+#         "comments": article.comment_set.all(),
+#         "comment_form": comment_form,
+#     }
+#     return render(request, "articles/comment_index.html", context)
 
 
 @login_required
 def comment_create(request, pk):
     article = Article.objects.get(pk=pk)
     comment_form = CommentForm(request.POST)
+    parent_comment_id = request.POST.get('parent_comment_id', None)
+
     if comment_form.is_valid():
         comment = comment_form.save(commit=False)
         comment.article = article
         comment.user = request.user
+        comment.parent_comment_id = parent_comment_id
         comment.save()
     return redirect("articles:detail", article.pk)
 
