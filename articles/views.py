@@ -5,8 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import *
 from .forms import *
-import locale
-import json
+from django.db.models import Q
+from django.contrib.auth import get_user_model
 
 
 # Create your views here.
@@ -100,7 +100,6 @@ def update(request, pk):
 
         # Article.objects.filter(record_Id=1).update(city=None) #잔여물
         
-
         for photo in photos:
             if photo.image:
                 photo.delete()
@@ -210,3 +209,32 @@ def comment_like(request, article_pk, comment_pk):
     else:
         comment.like_users.add(request.user)
     return redirect("articles:detail", article_pk)
+
+
+# 검색
+def search(request):
+    search_keyword = request.GET.get("search", "")
+    search_option = request.GET.get("search_option", "")    # title, title_content, hashtag, user
+    articles = Article.objects.order_by("-pk")
+
+    if search_keyword:
+        if search_option == "title":
+            search_articles = articles.filter(title__icontains=search_keyword)
+        elif search_option == "title_content":
+            # Q: ORM WHERE에서 or 연산을 수행
+            search_articles = articles.filter(Q(title__icontains=search_keyword) | Q(content__icontains=search_keyword))
+        elif search_option == "hashtag":
+            # distinct(): 중복 제거
+            # 만약 해시태그가 #1, #11, #111인 글이 하나 있고, 1을 검색하면
+            # 같은 글이 3개가 보여짐.
+            search_articles = articles.filter(tags__name__icontains=search_keyword).distinct()
+        elif search_option == "user":
+            # ForeignKey icontains
+            # {Article의 User field}__{User의 nickname field}__icontains
+            search_articles = articles.filter(Q(user__nickname__icontains=search_keyword))
+
+    context = {
+        "search_articles": search_articles,
+    }
+
+    return render(request, "articles/search.html", context)

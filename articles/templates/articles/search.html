@@ -13,7 +13,7 @@
 {% endblock css %}
 
 {% block content %}
-  <form role="search" action="{% url 'articles:search' %}" class="p-5">
+  <form role="search" action="" class="p-5">
     <div class="d-flex justify-content-center">
       <select class="form-select w-auto" name="search_option">
         <option value="title">제목</option>
@@ -28,7 +28,7 @@
   </form>
 
   <div class="row">
-    {% for article in articles %}
+    {% for article in search_articles %}
       <div class="col-md-4 col-sm-6 p-3">
         <a href="{% url 'articles:detail' article.pk %}">
           <div class="card">
