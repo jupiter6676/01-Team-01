@@ -18,6 +18,10 @@ class Article(models.Model):
     like_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="like_articles"
     )
+    bookmark_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="bookmark_articles"
+    )
+
 
     def __str__(self):
         return self.title
@@ -33,3 +37,6 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    like_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="like_comments"
+    )

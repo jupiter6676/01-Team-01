@@ -145,6 +145,15 @@ def like(request, pk):
     return redirect("articles:detail", pk)
 
 
+def bookmark(request, pk):
+    article = Article.objects.get(pk=pk)
+    if request.user in article.bookmark_users.all():
+        article.bookmark_users.remove(request.user)
+    else:
+        article.bookmark_users.add(request.user)
+    return redirect("articles:detail", pk)
+
+
 @login_required
 def comment_create(request, pk):
     article = Article.objects.get(pk=pk)
