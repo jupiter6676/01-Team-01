@@ -43,8 +43,8 @@
         </div>
         <hr>
         <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 20px">
-          <a id="articles" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">내 게시글</a>
-          <div id="like-count" style="cursor: pointer;margin: 0 30px;display: flex; flex-direction: row;align-items: center">좋아요</div>
+          <a id="link_user_articles" data-bs-toggle="collapse" href="#user_articles" role="button" aria-expanded="false" aria-controls="collapseExample">내 게시글</a>
+          <a id="link_like_articles" data-bs-toggle="collapse" href="#like_articles" role="button" aria-expanded="false" aria-controls="collapseExample">좋아요</a>
           <div id="button_feed_bookmark_list" style="cursor: pointer;margin: 0 30px;display: flex; flex-direction: row;align-items: center">북마크</div>
         <p class="text-muted m-0">
           <span class="me-3">팔로잉 <span id="followings-count">{{ user.followings.all|length }}</span>명</span>
@@ -54,9 +54,64 @@
     </div>
 </div>
 <div>
-        <div class="collapse" id="collapseExample">
+        <div class="collapse" id="user_articles">
           <div class="row">
             {% for article in articles %}
+              <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3">
+                <a href="{% url 'articles:detail' article.pk %}">
+                  <div class="card">
+                    <!-- 첫 번째 이미지를 썸네일로 -->
+                    {% if article.photo_set.all.0.image %}
+                      <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="240px">
+                    {% else %}
+                      <img src="https://dummyimage.com/1200x960/000000/c4c4c4" class="card-img-top" height="240px">
+                    {% endif %}
+        
+                    <div class="card-body d-flex flex-column justify-content-between" style="height: 12rem">
+                      <!-- 유저 -->
+                      <div class="mb-2">
+                        <a href="{% url 'accounts:detail' article.user.pk %}" class="text-dark">
+                          {% if article.user.profile.image %}
+                            <img src="{{ article.user.profile.image.url }}" alt="{{ article.user.profile.image }}" class="rounded-2 border border-1" width="40px">
+                          {% else %}
+                            <img src="{% static 'images/dummy-image-square.jpg' %}" alt="" class="rounded-2 border border-1" width="40px">
+                          {% endif %}
+                          <span class="ms-2">{{ article.user.nickname }}</span>
+                        </a>
+                      </div>
+        
+                      <a href="{% url 'articles:detail' article.pk %}" class="text-dark">
+                        <h4 class="card-title mb-3">{{ article.title }}</h4>
+                      </a>
+        
+                      <div class="hashtags col-lg-8 col-md-10 mb-2">
+                        {% for tag in article.tags.all %}
+                          <a href="/search/?search_option=hashtag&amp;search={{ tag.name }}" class="text-decoration-none fs-5">#{{ tag.name }}</a>
+                        {% endfor %}
+                      </div>
+        
+                      <!-- 좋아요, 댓글, 조회수 -->
+                      <div class="text-muted fs-5">
+                        <span class="bi bi-heart me-3">
+                          <span class="">{{ article.like_users.count }}</span>
+                        </span>
+                        <span class="bi bi-chat-dots-fill me-3"> 
+                          <span class="">{{ article.comment_set.all.count }}</span>
+                        </span>
+                        <span class="bi bi-eye-fill"> 
+                          <span class=""></span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            {% endfor %}
+            </div>
+        </div>
+        <div class="collapse" id="like_articles">
+          <div class="row">
+            {% for article in like_articles %}
               <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3">
                 <a href="{% url 'articles:detail' article.pk %}">
                   <div class="card">
@@ -115,39 +170,69 @@
 
 {% block script %}
   <script>
-    const form = document.querySelector("#follow-form")
-    const csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value
-    form.addEventListener('submit', function (event) {
-      event.preventDefault()
-      const userId = event.target.dataset.userId
+    // const form = document.querySelector("#follow-form")
+    // // const csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value
+    // form.addEventListener('submit', function (event) {
+    //   event.preventDefault()
+    //   const userId = event.target.dataset.userId
 
-      axios({
-        method: "post",
-        url: `/accounts/${userId}/follow/`,
-        headers: {
-          'X-CSRFToken': csrf_token
-        }
-      })
-      .then((response) => {
-        const followersCount = response.data.followers_count
-        const followingsCount = response.data.followings_count
-        const isFollowed = response.data.is_followed
-        const followBtn = document.querySelector('#follow-form > input[type=submit]')
-        if (isFollowed === true) {
-          followBtn.value = '언팔로우'
-          followBtn.classList.add('btn-secondary')
-          followBtn.classList.remove('btn-primary')
-        } else {
-          followBtn.value = '팔로우'
-          followBtn.classList.add('btn-primary')
-          followBtn.classList.remove('btn-secondary')
-        }
+    //   axios({
+    //     method: "post",
+    //     url: `/accounts/${userId}/follow/`,
+    //     headers: {
+    //       'X-CSRFToken': csrf_token
+    //     }
+    //   })
+    //   .then((response) => {
+    //     const followersCount = response.data.followers_count
+    //     const followingsCount = response.data.followings_count
+    //     const isFollowed = response.data.is_followed
+    //     const followBtn = document.querySelector('#follow-form > input[type=submit]')
+    //     if (isFollowed === true) {
+    //       followBtn.value = '언팔로우'
+    //       followBtn.classList.add('btn-secondary')
+    //       followBtn.classList.remove('btn-primary')
+    //     } else {
+    //       followBtn.value = '팔로우'
+    //       followBtn.classList.add('btn-primary')
+    //       followBtn.classList.remove('btn-secondary')
+    //     }
 
-        const followersCountTag = document.querySelector('#followers-count')
-        const followingsCountTag = document.querySelector('#followings-count')
-        followersCountTag.innerText = followersCount
-        followingsCountTag.innerText = followingsCount
-      })
+    //     const followersCountTag = document.querySelector('#followers-count')
+    //     const followingsCountTag = document.querySelector('#followings-count')
+    //     followersCountTag.innerText = followersCount
+    //     followingsCountTag.innerText = followingsCount
+    //   })
+    // })
+    const link_user_articles = document.querySelector('#link_user_articles')
+    console.log(link_user_articles)
+    const link_like_articles = document.querySelector('#link_like_articles')
+    const user_articles = document.querySelector('#user_articles')
+    const like_articles = document.querySelector('#like_articles')
+    const x = link_like_articles.getAttribute('aria-expanded')
+    const y = link_user_articles.getAttribute('aria-expanded')
+    const bsCollapse = new bootstrap.Collapse('#like_articles', {
+    toggle: false
+    })
+    const bsCollapse2 = new bootstrap.Collapse('#user_articles', {
+    toggle: false
+    })
+    user_articles.addEventListener('show.bs.collapse', event => {
+      console.log('dd')
+    const x = link_like_articles.getAttribute('aria-expanded')
+    console.log(x)
+    if(x===true){x=false}
+    link_like_articles.setAttribute('aria-expanded',x)
+    
+    bsCollapse.hide()
+    })
+    like_articles.addEventListener('show.bs.collapse', event => {
+    const y = link_user_articles.getAttribute('aria-expanded')
+    console.log(y)
+    if(y===true){y=false}
+    link_user_articles.setAttribute('aria-expanded',y)
+
+    bsCollapse2.hide()
     })
   </script>
 {% endblock script %}
