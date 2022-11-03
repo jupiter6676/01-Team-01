@@ -25,7 +25,11 @@ def create(request):
         article_form = ArticleForm(request.POST, request.FILES)
         photo_form = PhotoForm(request.POST, request.FILES)
         images = request.FILES.getlist("image")
-        tags = request.POST.get("tags", "").split(",")
+
+        if request.POST.get("tags", "") != "":
+            tags = request.POST.get("tags", "").split(",")
+        else:
+            tags = None
 
         if article_form.is_valid() and photo_form.is_valid():
             article = article_form.save(commit=False)
@@ -39,10 +43,12 @@ def create(request):
 
             else:
                 article.save()
-                for tag in tags:
-                    tag = tag.strip()
-                    article.tags.add(tag)
-                    article.save()
+
+                if tags:
+                    for tag in tags:
+                        tag = tag.strip()
+                        article.tags.add(tag)
+                        article.save()
 
             return redirect("articles:index")
     else:
