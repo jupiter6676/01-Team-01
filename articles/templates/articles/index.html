@@ -4,7 +4,8 @@
 {% block css %}
   <style>
     .hashtags {
-      width: 100%%;
+      width: 100%;
+      min-height: 24px;
       text-overflow: ellipsis;
       white-space: nowrap;  
       overflow: hidden;
@@ -13,38 +14,52 @@
 {% endblock css %}
 
 {% block content %}
+  <form role="search" action="{% url 'articles:search' %}" class="p-5">
+    <div class="d-flex justify-content-center">
+      <select class="form-select w-auto" name="search_option">
+        <option value="title">제목</option>
+        <option value="title_content">제목+내용</option>
+        <option value="hashtag">해시태그</option>
+        <option value="user">작성자</option>
+      </select>
+      
+      <input class="form-control w-50 mx-2" type="search" placeholder="Search" name="search">
+      <input class="btn btn-success" type="submit" value="검색">
+    </div>
+  </form>
+
   <div class="row">
     {% for article in articles %}
-      <div class="col-md-4 col-sm-6 p-3">
+      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3">
         <a href="{% url 'articles:detail' article.pk %}">
           <div class="card">
             <!-- 첫 번째 이미지를 썸네일로 -->
             {% if article.photo_set.all.0.image %}
-              <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="300px">
+              <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="240px">
             {% else %}
-              <img src="https://dummyimage.com/1200x960/000000/c4c4c4" class="card-img-top" height="300px">
+              <img src="https://dummyimage.com/1200x960/000000/c4c4c4" class="card-img-top" height="240px">
             {% endif %}
 
-            <div class="card-body d-flex flex-column justify-content-between" style="height: 14rem">
+            <div class="card-body d-flex flex-column justify-content-between" style="height: 12rem">
               <!-- 유저 -->
-              <div class="mb-3">
-                <a href="{% url 'accounts:detail' article.user.pk %}" class="text-decoration-none text-dark">
+              <div class="mb-2">
+                <a href="{% url 'accounts:detail' article.user.pk %}" class="text-dark">
                   {% if article.user.profile.image %}
-                    <img src="{{ article.user.profile.image.url }}" alt="{{ article.user.profile.image }}" class="rounded-2 border border-1" width="48px">
+                    <img src="{{ article.user.profile.image.url }}" alt="{{ article.user.profile.image }}" class="rounded-2 border border-1" width="40px">
                   {% else %}
-                    <img src="{% static 'images/dummy-image-square.jpg' %}" alt="" class="rounded-2 border border-1" width="48px">
+                    <img src="{% static 'images/dummy-image-square.jpg' %}" alt="" class="rounded-2 border border-1" width="40px">
                   {% endif %}
                   <span class="ms-2">{{ article.user.nickname }}</span>
                 </a>
               </div>
 
-              <a href="{% url 'articles:detail' article.pk %}" class="text-decoration-none text-dark">
-                <h3 class="card-title mb-3">{{ article.title }}</h3>
+              <a href="{% url 'articles:detail' article.pk %}" class="text-dark">
+                <h4 class="card-title mb-3">{{ article.title }}</h4>
               </a>
 
               <div class="hashtags col-lg-8 col-md-10 mb-2">
                 {% for tag in article.tags.all %}
-                  <a href="#" class="text-decoration-none fs-5">#{{ tag.name }}</a>
+                  <a href="/search/?search_option=hashtag&amp;search={{ tag.name }}" class="text-decoration-none fs-5">#{{ tag.name }}</a>
                 {% endfor %}
               </div>
 
