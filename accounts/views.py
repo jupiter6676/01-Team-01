@@ -22,7 +22,7 @@ def signup(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            Profile.objects.create(user=user)   #프로필 생성
+            Profile.objects.create(user=user)  # 프로필 생성
             auth_login(request, user)
             return redirect("articles:index")
     else:
@@ -54,7 +54,9 @@ def logout(request):
 
 def detail(request, pk):
     user = get_user_model().objects.get(pk=pk)
-    context = {"user": user}
+    articles = user.article_set.all()
+    print(articles)
+    context = {"user": user, "articles": articles}
     return render(request, "accounts/detail.html", context)
 
 
@@ -62,7 +64,7 @@ def detail(request, pk):
 @login_required
 def follow(request, pk):
     user = get_object_or_404(get_user_model(), pk=pk)
-    
+
     # 프로필에 해당하는 유저를 로그인한 유저가 팔로우 할 수 없음
     if request.user == user:
         messages.warning(request, "스스로 팔로우 할 수 없습니다.")
@@ -72,7 +74,7 @@ def follow(request, pk):
     if request.user in user.followers.all():
         user.followers.remove(request.user)
         is_followed = False
-    
+
     # 팔로우 상태가 아니면, '팔로우'를 누르면 추가
     else:
         user.followers.add(request.user)
@@ -83,7 +85,7 @@ def follow(request, pk):
         "followings_count": user.followings.count(),
         "is_followed": is_followed,
     }
-    
+
     return JsonResponse(data)
 
 
@@ -109,17 +111,17 @@ def password(request):
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             form.save()
-            update_session_auth_hash(request, form.user)    # 로그인 유지
-            return redirect('accounts:mypage', request.user.pk)
+            update_session_auth_hash(request, form.user)  # 로그인 유지
+            return redirect("accounts:mypage", request.user.pk)
 
     else:
         form = PasswordChangeForm(request.user)
 
     context = {
-        'form' : form,
+        "form": form,
     }
-    
-    return render(request, 'accounts/password.html', context)
+
+    return render(request, "accounts/password.html", context)
 
 
 # 회원 탈퇴
@@ -128,7 +130,7 @@ def delete(request):
         request.user.delete()
         auth_logout(request)
 
-    return redirect('articles:index')
+    return redirect("articles:index")
 
 
 # 회원 프로필 (프로필 사진, 소개글) (+ 닉네임?)
@@ -140,7 +142,7 @@ def update(request, pk):
     if request.user.profile:
         profile = request.user.profile
 
-        if request.method == 'POST':
+        if request.method == "POST":
             profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
             change_form = CustomUserChangeForm(request.POST, instance=user)
 
@@ -148,15 +150,15 @@ def update(request, pk):
                 profile_form.save()
                 change_form.save()
                 # return redirect('accounts:detail', request.user.pk)
-                return redirect('accounts:mypage', request.user.pk)
-        
+                return redirect("accounts:mypage", request.user.pk)
+
         else:
             profile_form = ProfileForm(instance=profile)
             change_form = CustomUserChangeForm(instance=user)
 
     # 최초 생성
     else:
-        if request.method == 'POST':
+        if request.method == "POST":
             profile_form = ProfileForm(request.POST, request.FILES)
             change_form = CustomUserChangeForm(request.POST, instance=user)
 
@@ -164,15 +166,24 @@ def update(request, pk):
                 profile_form.save()
                 change_form.save()
                 # return redirect('accounts:detail', request.user.pk)
-                return redirect('accounts:mypage', request.user.pk)
-        
+                return redirect("accounts:mypage", request.user.pk)
+
         else:
             profile_form = ProfileForm()
             change_form = CustomUserChangeForm(instance=user)
 
     context = {
-        'profile_form': profile_form,
-        'change_form': change_form,
+        "profile_form": profile_form,
+        "change_form": change_form,
     }
 
-    return render(request, 'accounts/update.html', context)
+    return render(request, "accounts/update.html", context)
+
+
+@login_required
+def articles(request, pk):
+    articles = all.Articles.objects.filter(user=request.user).order_by("-pk")
+    context = {
+        "articles": articles,
+    }
+    return render(request, "accounts/articles.html", context)
