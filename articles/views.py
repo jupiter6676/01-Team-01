@@ -2,6 +2,7 @@ from xml.etree.ElementTree import Comment
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.http import JsonResponse
 from .models import *
 from .forms import *
@@ -159,6 +160,18 @@ def bookmark(request, pk):
     return redirect("articles:detail", pk)
 
 
+@xframe_options_exempt
+def comment_index(request, article_pk):
+    article = Article.objects.get(pk=article_pk)
+    comment_form = CommentForm()
+    context = {
+        "article": article,
+        "comments": article.comment_set.all(),
+        "comment_form": comment_form,
+    }
+    return render(request, "articles/comment_index.html", context)
+
+
 @login_required
 def comment_create(request, pk):
     article = Article.objects.get(pk=pk)
@@ -183,36 +196,21 @@ def comment_delete(request, article_pk, comment_pk):
 @login_required
 def comment_update(request, article_pk, comment_pk):
     comment = Comment.objects.get(pk=comment_pk)
-    comment_form = CommentForm(instance=comment)
     if request.user != comment.user:
         from django.http import HttpResponseForbidden
-
         return HttpResponseForbidden()
     if request.method == "POST":
-        form = CommentForm(request.POST, instance=comment)
-        if form.is_valid():
-            form.save()
+        comment_form = CommentForm(request.POST, instance=comment)
+        if comment_form.is_valid():
+            comment_form.save()
             return redirect("articles:detail", article_pk)
     else:
         form = CommentForm(instance=comment)
-    return render("articles:comment_update", {"form": form})
-
-
-# @login_required
-# def comment_like(request, article_pk, comment_pk):
-#     comment = get_object_or_404(Comment, pk=comment_pk)
-#     if comment.like_users.filter(pk=request.user.pk).exists():
-#   # if request.user in comment.like_users.all():
-#         comment.like_users.remove(request.user)
-#         is_comment_liked = False
-#     else:
-#         comment.like_users.add(request.user)
-#         is_comment_liked = True
-#     context = {
-#         "is_comment_liked": is_comment_liked,
-#         "comment_like_count": comment.like_users.count(),
-#     }
-#     return JsonResponse(context)
+    context = {
+        "comment": comment,
+        "comment_form": comment_form,
+    }
+    return render(request, "articles/comment_update.html", context)
 
 
 @login_required

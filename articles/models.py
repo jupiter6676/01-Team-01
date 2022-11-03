@@ -22,7 +22,6 @@ class Article(models.Model):
         settings.AUTH_USER_MODEL, related_name="bookmark_articles"
     )
 
-
     def __str__(self):
         return self.title
 
@@ -40,3 +39,4 @@ class Comment(models.Model):
     like_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="like_comments"
     )
+    parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True)

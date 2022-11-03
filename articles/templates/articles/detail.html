@@ -7,7 +7,7 @@
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-12 col-lg-8">
-    <div class="bg-light p-3 mb-4" style="border-radius: 0.5rem; box-shadow: 0px 0 10px 1px rgb(169 169 169 / 50%);">
+    <div class="p-3 mb-4" style="border-radius: 0.5rem; box-shadow: 0px 0 10px 1px rgb(169 169 169 / 50%);">
       <!-- carousel 사진 영역 -->
       <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="true">
         <div class="carousel-indicators">
@@ -93,38 +93,39 @@
         <a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
         {% endif %}
       </div>
-      <hr>
       {% for comment in comments %}
       <div class="mt-3 d-flex justify-content-between">
         <div>
-          <p style="font-size: 0.7rem; margin-bottom: 0rem;">
+          <p style="font-size: 0.8rem; margin-bottom: 0rem;">
             <a href="{% url 'accounts:detail' article.user.pk %}">{{ comment.user.username }}</a> | {{ comment.created_at|date:'Y-m-d H:i' }}
           </p>
           <p style="margin-bottom: 0rem;">{{ comment.content }}</p>
+          <div class="d-flex mb-0" style="font-size: 0.7rem;">
+            <a href="{% url 'articles:comment_create' article.pk %}">답글 달기</a>
+            <p class="mx-3 mb-0">좋아요 {{ comment.like_users.count }}개</p>
+          </div>
         </div>
         <div class="d-flex justify-content-end mt-2">
         {% if request.user.is_authenticated %}
-          <a class="like-heart mt-2" href="{% url 'articles:comment_like' article.pk comment.pk %}">
+          <a class="like-heart mt-2 mx-2" href="{% url 'articles:comment_like' article.pk comment.pk %}">
           {% if request.user in comment.like_users.all %}
-            <i class="bi bi-heart-fill"></i><span> {{ comment.like_users.count }}</span>
+            <i class="bi bi-heart-fill"></i>
           {% else %}
-            <i class="bi bi-heart"></i><span> {{ comment.like_users.count }}</span>
+            <i class="bi bi-heart"></i>
           {% endif %}
           </a>
         {% else %}
-          <a href="#" class="btn btn-outline-primary">
-            <i class="bi bi-heart"><span id="like-count"> {{ comment.like_users.count }}</span></i>
+          <a href="{% url 'accounts:login' %}" class="mx-2">
+            <i class="bi bi-heart"></i>
           </a>
         {% endif %}
         {% if user == comment.user %}
         <!-- 댓글 수정 버튼 -->
-        <!-- <form action="{% url 'articles:comment_update' article.pk comment.pk %}" method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          {% bootstrap_form comment_form %}
-          <button class="btn btn-none border-0 p-0 me-2">
-            <img src="{% static 'image/edit.png' %}" style="width: 20px">
-          </button>
-          </form>  -->
+          <!-- <form action="{% url 'articles:comment_update' article.pk comment.pk %}" method="POST" enctype="multipart/form-data">
+            <button class="btn btn-none border-0 p-0 me-2">
+              <img src="{% static 'image/edit.png' %}" style="width: 20px">
+            </button>
+          </form> -->
         <!-- 댓글 삭제 버튼 -->
           <form action="{% url 'articles:comment_delete' article.pk comment.pk %}" method="POST" class="d-inline mt-1">
             {% csrf_token %}
