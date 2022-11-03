@@ -58,7 +58,7 @@
 
               <div class="hashtags col-lg-8 col-md-10 mb-2">
                 {% for tag in article.tags.all %}
-                  <a href="#" class="text-decoration-none fs-5">#{{ tag.name }}</a>
+                  <a href="/search/?search_option=hashtag&amp;search={{ tag.name }}" class="text-decoration-none fs-5">#{{ tag.name }}</a>
                 {% endfor %}
               </div>
 

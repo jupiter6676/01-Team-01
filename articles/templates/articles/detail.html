@@ -41,7 +41,7 @@
         <p class="mt-3">{{ article.content }} </p>
         <div>
           {% for tag in article.tags.all %}
-          <a href="#"><span>#{{ tag.name }}</span></a>
+            <a href="/search/?search_option=hashtag&amp;search={{ tag.name }}"><span>#{{ tag.name }}</span></a>
           {% endfor %}
         </div>
         <!-- 좋아요 댓글 북마크-->
