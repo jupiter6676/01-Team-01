@@ -80,11 +80,11 @@
         </a>
       </div>
     {% endfor %}
+  </div>
 
-    <div class="position-fixed fixed-bottom text-end">
-      {% if request.user.is_authenticated %}
-        <a class="btn btn-primary m-5" href="{% url 'articles:create' %}">글쓰기</a>
-      {% endif %}
-    </div>
+  <div class="position-fixed fixed-bottom text-end">
+    {% if request.user.is_authenticated %}
+      <a class="btn btn-primary m-5" href="{% url 'articles:create' %}">글쓰기</a>
+    {% endif %}
   </div>
 {% endblock content %}
