@@ -1,4 +1,3 @@
-from xml.etree.ElementTree import Comment
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -74,6 +73,7 @@ def detail(request, pk):
         "comment_form": comment_form,
         "photo_cnt": article.photo_set.count(),
     }
+
     return render(request, "articles/detail.html", context)
 
 
@@ -191,16 +191,54 @@ def comment_create(request, pk):
         comment.user = request.user
         comment.parent_comment_id = parent_comment_id
         comment.save()
-    return redirect("articles:detail", article.pk)
+
+    data = {
+        'parent_comment_pk': parent_comment_id,
+        'comment_pk': comment.pk,
+        'user_pk': comment.user.pk,
+        'nickname': comment.user.nickname,
+        'content': comment.content,
+        'created_at': comment.created_at,
+        'commentLikeCount': comment.like_users.count(),
+        'commentCount': article.comment_set.count(),
+    }
+
+    # return redirect("articles:detail", article.pk)
+    return JsonResponse(data)
 
 
 @login_required
 def comment_delete(request, article_pk, comment_pk):
+    article = Article.objects.get(pk=article_pk)
+    comment = Comment.objects.get(pk=comment_pk)
+    replies = article.comment_set.filter(parent_comment=comment)
+    
+    print(replies)
+
     if request.user.is_authenticated:
         comment = Comment.objects.get(pk=comment_pk)
+        is_deleted = False
+
         if request.user == comment.user:
+            is_deleted = True
+
+            if replies:
+                is_parent = True
+                parent_comment_pk = comment.pk
+            else:
+                is_parent = False
+                parent_comment_pk = None
+
             comment.delete()
-    return redirect("articles:detail", article_pk)
+
+    data = {
+        'parent_comment_pk': parent_comment_pk,
+        'is_deleted': is_deleted,
+        'is_parent': is_parent,
+        'commentCount': article.comment_set.count(),
+    }
+
+    return JsonResponse(data)
 
 
 @login_required
