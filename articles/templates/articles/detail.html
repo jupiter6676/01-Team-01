@@ -35,14 +35,9 @@
 
       <!-- 제목 본문 태그 -->
       <div>
-        <h1 class="mt-3">{{ article.title }}
-          </h1>
-          <svg width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2.31055C6.81525 2.31194 5.67942 2.78321 4.84166 3.62096C4.00391 4.45871 3.53265 5.59454 3.53125 6.7793C3.52984 7.74748 3.84609 8.6894 4.4315 9.46055C4.4315 9.46055 4.55338 9.62102 4.57329 9.64417L8 13.6855L11.4283 9.64214C11.4462 9.62061 11.5685 9.46055 11.5685 9.46055L11.5689 9.45933C12.154 8.68851 12.4701 7.74704 12.4688 6.7793C12.4674 5.59454 11.9961 4.45871 11.1583 3.62096C10.3206 2.78321 9.18476 2.31194 8 2.31055ZM9.4625 8.81055L8 7.87983L6.5375 8.81055L6.78125 7.15548L5.5625 6.03708L7.26875 5.83111L8 4.3418L8.77675 5.83152L10.4375 6.03708L9.21875 7.15548L9.4625 8.81055Z" fill="#0060FF"></path></svg>
-          <span class="text-b3 text-primary">{{article.location}}</span>
-          
-
+        <h1 class="mt-3">{{ article.title }}</h1>
         <div class="d-flex justify-content-between">
-          <span style="font-size: 25px;"><a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.username }}</a></span>
+          <span style="font-size: 25px;"><a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.nickname }}</a></span>
           <p style="font-size: 13px;">작성 {{ article.created_at|date:'Y-m-d H:i' }} | 수정 {{ article.updated_at|date:'Y-m-d H:i' }}</p>
         </div>
         <p class="mt-3">{{ article.content }} </p>
@@ -72,7 +67,7 @@
 
             <div class="ms-3">
               <i class="bi bi-chat"> </i>
-              <span id="comment-count">{{ article.comment_set.all.count }}</span>
+              <span class="comment-count">{{ article.comment_set.all.count }}</span>
             </div>
           </div>
 
@@ -97,9 +92,9 @@
 
       <!-- 댓글 입력 창 -->
       <div>
-        <h5 class="my-3">댓글 <span id="comment-count">{{ article.comment_set.all.count }}</span></h5>
+        <h5 class="my-3">댓글 <span class="comment-count">{{ article.comment_set.all.count }}</span></h5>
         {% if request.user.is_authenticated %}
-          <form action="{% url 'articles:comment_create' article.pk %}" method="POST">
+          <form id="comment-form" data-article-id="{{ article.pk }}">
             {% csrf_token %}
             <div class="d-flex">
               {{ comment_form.content|add_class:'form-control' }}
@@ -112,54 +107,88 @@
       </div>
 
       <!-- 댓글 목록 -->
-      {% for comment in comments %}
-        <div class="mt-3 d-flex justify-content-between">
-          <div>
-            <p style="font-size: 0.8rem; margin-bottom: 0rem;">
-              <a href="{% url 'accounts:detail' article.user.pk %}">{{ comment.user.username }}</a> | {{ comment.created_at|date:'Y-m-d H:i' }}
-            </p>
-            <p style="margin-bottom: 0rem;">{{ comment.content }}</p>
+      <div id="comments-box">
+        {% for comment in comments %}
+          <div class="mt-3" id="comment-{{ comment.pk }}">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="w-100">
+                <p style="font-size: 0.8rem; margin-bottom: 0rem;">
+                  <a href="{% url 'accounts:detail' article.user.pk %}">{{ comment.user.nickname }}</a> | {{ comment.created_at|date:'Y-m-d H:i' }}
+                </p>
+                <p style="margin-bottom: 0rem;">{{ comment.content }}</p>
+              </div>
+
+              {% if request.user.is_authenticated %}
+                <a class="like-heart mt-2 mx-2" href="">
+                  {% if request.user in comment.like_users.all %}
+                    <i id="btn-comment-like" data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
+                  {% else %}
+                    <i id="btn-comment-like" data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart btn-comment-like"></i>
+                  {% endif %}
+                </a>
+              {% else %}
+                <a href="{% url 'accounts:login' %}" class="mx-2">
+                  <i class="bi bi-heart"></i>
+                </a>
+              {% endif %}
+              
+              {% if user == comment.user %}
+                <form data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="comment-delete-forms d-inline mt-1">
+                  {% csrf_token %}
+                  <button class="btn btn-none border-0 p-0" type="submit">
+                  <img src="{% static 'images/bin.png' %}" style="width: 24px">
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+
             <div class="d-flex mb-0" style="font-size: 0.7rem;">
               <a href="#replyBox{{ comment.pk }}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseExample">
                 답글 달기
               </a>
               <p class="mx-3 mb-0">좋아요 <span id="comment-{{ comment.pk }}-like-count">{{ comment.like_users.count }}</span>개</p>
             </div>
+          </div>
 
-            <!-- 답글 창 펼치기 -->
-            <div class="collapse" id="replyBox{{ comment.pk }}">
-              <div class="card card-body">
-                {% if request.user.is_authenticated %}
-                  <form action="{% url 'articles:comment_create' article.pk %}" method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="parent_comment_id" value="{{ comment.pk }}">
-                    
-                    <div class="d-flex">
-                      {{ comment_form.content|add_class:'form-control' }}
-                      <input class="btn btn-sm btn-outline-primary" type="submit" value="등록">
-                    </div>
-                  </form>
-                {% else %}
-                  <a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
-                {% endif %}
-              </div>
+          <!-- 답글 창 펼치기 -->
+          <div class="collapse" id="replyBox{{ comment.pk }}">
+            <div class="mt-2">
+              {% if request.user.is_authenticated %}
+                <!-- <form action="{% url 'articles:comment_create' article.pk %}" method="POST"> -->
+                <form class="reply-forms" data-article-id="{{ article.pk }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="parent_comment_id" value="{{ comment.pk }}">
+                  
+                  <div class="d-flex">
+                    {{ comment_form.content|add_class:'form-control' }}
+                    <input class="btn btn-sm btn-outline-primary ms-2" type="submit" value="등록">
+                  </div>
+                </form>
+              {% else %}
+                <a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
+              {% endif %}
             </div>
+          </div>
 
-            <!-- 답글 목록 -->
-            <div class="text-bg-dark">
-              {% for reply in replies %}
+          <!-- 답글 목록 -->
+          <div id="replies-box-{{ comment.pk }}">
+            {% for reply in replies %}
+              <div class="ms-5 my-2" id="comment-{{ reply.pk }}">
                 {% if reply.parent_comment == comment %}
-                  <p style="font-size: 0.8rem; margin-bottom: 0rem;">
-                    <a href="{% url 'accounts:detail' article.user.pk %}">{{ reply.user.username }}</a> | {{ reply.created_at|date:'Y-m-d H:i' }}
-                  </p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="w-100">
+                      <p style="font-size: 0.8rem; margin-bottom: 0rem;">
+                        <a href="{% url 'accounts:detail' article.user.pk %}">{{ reply.user.nickname }}</a> | {{ reply.created_at|date:'Y-m-d H:i' }}
+                      </p>
+                      <p style="margin-bottom: 0rem;">{{ reply.content }}</p>
+                    </div>
 
-                  <div class="d-flex justify-content-end mt-2">
                     {% if request.user.is_authenticated %}
                       <a class="like-heart mt-2 mx-2" href="">
                         {% if request.user in reply.like_users.all %}
-                          <i data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
+                          <i id="btn-comment-like" data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
                         {% else %}
-                          <i data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart btn-comment-like"></i>
+                          <i id="btn-comment-like" data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart btn-comment-like"></i>
                         {% endif %}
                       </a>
                     {% else %}
@@ -167,78 +196,55 @@
                         <i class="bi bi-heart"></i>
                       </a>
                     {% endif %}
+                    
                     {% if user == reply.user %}
-                      <form action="{% url 'articles:comment_delete' article.pk reply.pk %}" method="POST" class="d-inline mt-1">
+                      <form data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="comment-delete-forms d-inline mt-1">
                         {% csrf_token %}
                         <button class="btn btn-none border-0 p-0" type="submit">
                         <img src="{% static 'images/bin.png' %}" style="width: 24px">
                         </button>
                       </form>
-                    {% else %}
                     {% endif %}
                   </div>
 
-                  <p style="margin-bottom: 0rem;">{{ reply.content }}</p>
                   <div class="d-flex mb-0" style="font-size: 0.7rem;">
-                    <p class="mx-3 mb-0">좋아요 <span id="comment-{{ reply.pk }}-like-count">{{ reply.like_users.count }}</span>개</p>
+                    <p class="mb-0">좋아요 <span id="comment-{{ reply.pk }}-like-count">{{ reply.like_users.count }}</span>개</p>
                   </div>
                 {% endif %}
-              {% endfor %}
-            </div>
+              </div>
+            {% endfor %}
           </div>
-
-          <div class="d-flex justify-content-end mt-2">
-            {% if request.user.is_authenticated %}
-              <a class="like-heart mt-2 mx-2" href="">
-                {% if request.user in comment.like_users.all %}
-                  <i data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
-                {% else %}
-                  <i data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart btn-comment-like"></i>
-                {% endif %}
-              </a>
-            {% else %}
-              <a href="{% url 'accounts:login' %}" class="mx-2">
-                <i class="bi bi-heart"></i>
-              </a>
-            {% endif %}
-            {% if user == comment.user %}
-          <!-- 댓글 수정 버튼 -->
-   
-              <a class="btn btn-none border-0 p-0 me-2" href="{% url 'articles:comment_update' article.pk comment.pk %}">
-                <img src="{% static 'image/edit.png' %}" style="width: 20px"></a>
-              </button>
-            </form> 
-            <!-- 댓글 삭제 버튼 -->
-              <form action="{% url 'articles:comment_delete' article.pk comment.pk %}" method="POST" class="d-inline mt-1">
-                {% csrf_token %}
-                <button class="btn btn-none border-0 p-0" type="submit">
-                <img src="{% static 'images/bin.png' %}" style="width: 24px">
-                </button>
-              </form>
-            {% else %}
-            {% endif %}
-          </div>
-        </div>
-        {% empty %}
-        <p class="my-3">댓글이 아직 없어요.</p>
-      {% endfor %}
+        {% endfor %}
+      </div>
     </div>
 
     <!-- 글 수정 & 삭제 & 뒤로가기 -->
     <div class='d-flex justify-content-end'>
       {% if request.user == article.user %}
-        <form action="{% url 'articles:delete' article.pk %}" method="POST" class="form">
-          {% csrf_token %}
-          <div class="d-flex d-lg-none">
-            <a href="{% url 'articles:update' article.pk %}" class="btn btn-outline-primary form-control mb-3 me-2">수정</a>
-            <input class="btn btn-outline-danger form-control mb-3 me-2" type="submit" value="삭제">
-            <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary form-control mb-3">뒤로</a>
-          </div>
-        </form>
-      {% else %}
+      <form action="{% url 'articles:delete' article.pk %}" method="POST" class="form">
+        {% csrf_token %}
         <div class="d-block d-lg-none">
+          <a href="{% url 'articles:update' article.pk %}" class="btn btn-outline-primary form-control mb-3">수정</a>
+          <input class="btn btn-outline-danger form-control mb-3" type="submit" value="삭제">
           <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary form-control mb-3">뒤로</a>
         </div>
+        <div class="d-none d-lg-block">
+          <a href="{% url 'articles:update' article.pk %}" class="btn btn-outline-primary">수정</a>
+          <input class="btn btn-outline-danger" type="submit" value="삭제">
+          <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary">뒤로</a>
+        </div>
+      </form>
+      {% else %}
+      <div class="d-block d-lg-none">
+        <!-- <button class="btn btn-outline-primary form-control mb-3 disabled">수정</button>
+        <button class="btn btn-outline-danger form-control mb-3 disabled">삭제</button> -->
+        <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary form-control mb-3">뒤로</a>
+      </div>
+      <div class="d-none d-lg-block">
+        <!-- <button class="btn btn-outline-primary disabled">수정</button>
+        <button class="btn btn-outline-danger disabled">삭제</button> -->
+        <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary">뒤로</a>
+      </div>
       {% endif %}
     </div>
   </div>
@@ -259,11 +265,11 @@
       })
       .then(response => {
         if (response.data.isLiked === true) {
-          event.target.classList.add('bi-heart-fill')
-          event.target.classList.remove('bi-heart')
+          event.target.classList.add('bi-heart-fill', 'text-danger')
+          event.target.classList.remove('bi-heart', 'text-dark')
         } else {
-          event.target.classList.add('bi-heart')
-          event.target.classList.remove('bi-heart-fill')
+          event.target.classList.add('bi-heart', 'text-dark')
+          event.target.classList.remove('bi-heart-fill', 'text-danger')
         }
         const articleLikeCount = document.querySelector('#article-like-count')
         articleLikeCount.innerText = response.data.likeCount
@@ -312,6 +318,225 @@
           }
           const commentLikeCount = document.querySelector(`#comment-${commentId}-like-count`)
           commentLikeCount.innerText = response.data.likeCount
+        })
+      })
+    })
+
+    // 댓글 생성
+    const commentForm = document.querySelector('#comment-form')
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value
+    if (commentForm) {
+      commentForm.addEventListener('submit', event => {
+        event.preventDefault()
+        const articleId = event.target.dataset.articleId
+        const commentId = event.target.dataset.commentId
+
+        axios({
+          method: 'POST',
+          url: `/${articleId}/comments/`,
+          headers: {'X-CSRFToken': csrfToken},
+          data: new FormData(commentForm)
+        })
+        .then(response => {
+          const commentCount = document.querySelectorAll('.comment-count')
+          const commentsBox = document.querySelector('#comments-box')
+
+          commentCount.forEach(cnt => {
+            cnt.innerText = response.data.commentCount
+          })
+
+          console.log(response.data.comment_pk)
+
+          const created_at = new moment(response.data.created_at)
+          const newDateFormat = created_at.format("YYYY-MM-DD HH:mm")
+
+          commentsBox.insertAdjacentHTML('beforeend', 
+            `<div class="mt-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="w-100">
+                  <p style="font-size: 0.8rem; margin-bottom: 0rem;">
+                    <a href="/accounts/${response.data.user_pk}/">${response.data.nickname}</a> | ${newDateFormat}
+                  </p>
+                  <p style="margin-bottom: 0rem;">${response.data.content}</p>
+                </div>
+  
+                <a class="like-heart mt-2 mx-2" href="">
+                  {% if request.user in comment.like_users.all %}
+                    <i data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
+                  {% else %}
+                    <i data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart btn-comment-like"></i>
+                  {% endif %}
+                </a>
+                
+                <form data-article-id="${articleId}" data-comment-id="${commentId}" class="comment-delete-forms d-inline mt-1">
+                  {% csrf_token %}
+                  <button class="btn btn-none border-0 p-0" type="submit">
+                  <img src="{% static 'images/bin.png' %}" style="width: 24px">
+                  </button>
+                </form>
+              </div>
+  
+              <div class="d-flex mb-0" style="font-size: 0.7rem;">
+                <a href="#replyBox${response.data.comment_pk}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseExample">
+                  답글 달기
+                </a>
+                <p class="mx-3 mb-0">좋아요 <span id="comment-${response.data.comment_pk}-like-count">${response.data.commentLikeCount}</span>개</p>
+              </div>
+            </div>
+  
+            <!-- 답글 창 펼치기 -->
+            <div class="collapse" id="replyBox${response.data.comment_pk}">
+              <div class="mt-2">
+                <form id="reply-forms" data-article-id="${articleId}">
+                  {% csrf_token %}
+                  <input type="hidden" name="parent_comment_id" value="${response.data.comment_pk}">
+                  
+                  <div class="d-flex">
+                    {{ comment_form.content|add_class:'form-control' }}
+                    <input class="btn btn-sm btn-outline-primary ms-2" type="submit" value="등록">
+                  </div>
+                </form>
+              </div>
+            </div>
+  
+            <!-- 답글 목록 -->
+            <div id="replies-box-${commentId}">
+              {% for reply in replies %}
+                <div class="ms-5 my-2" id="comment-${response.data.comment_pk}">
+                  {% if reply.parent_comment == comment %}
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="w-100">
+                        <p style="font-size: 0.8rem; margin-bottom: 0rem;">
+                          <a href="/accounts/${response.data.user_pk}/">${response.data.nickname}</a> | ${newDateFormat}
+                        </p>
+                        <p style="margin-bottom: 0rem;">${response.data.content}</p>
+                      </div>
+    
+                      <a class="like-heart mt-2 mx-2" href="">
+                        {% if request.user in reply.like_users.all %}
+                          <i data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
+                        {% else %}
+                          <i data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart btn-comment-like"></i>
+                        {% endif %}
+                      </a>
+                      
+                      <form data-article-id="${articleId}" data-comment-id="${response.data.comment_pk}" class="comment-delete-forms d-inline mt-1">
+                        {% csrf_token %}
+                        <button class="btn btn-none border-0 p-0" type="submit">
+                        <img src="{% static 'images/bin.png' %}" style="width: 24px">
+                        </button>
+                      </form>
+                    </div>
+    
+                    <div class="d-flex mb-0" style="font-size: 0.7rem;">
+                      <p class="mb-0">좋아요 <span id="comment-${response.data.comment_pk}-like-count">${response.data.commentLikeCount}</span>개</p>
+                    </div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>`
+          )
+
+          commentForm.reset()
+        })
+      })
+    }
+
+    // 답글 생성
+    const replyForms = document.querySelectorAll('.reply-forms')
+    replyForms.forEach(form => {
+      form.addEventListener('submit', event => {
+        event.preventDefault()
+        const articleId = event.target.dataset.articleId
+        const commentId = event.target.dataset.commentId
+
+        axios({
+          method: 'POST',
+          url: `/${articleId}/comments/`,
+          headers: {'X-CSRFToken': csrfToken},
+          data: new FormData(form)
+        })
+        .then(response => {
+          const commentCount = document.querySelectorAll('.comment-count')
+          const repliesBox = document.querySelector(`#replies-box-${response.data.parent_comment_pk}`)
+
+          commentCount.forEach(cnt => {
+            cnt.innerText = response.data.commentCount
+          })
+
+          const created_at = new moment(response.data.created_at)
+          const newDateFormat = created_at.format("YYYY-MM-DD HH:mm")
+
+          repliesBox.insertAdjacentHTML('beforeend', 
+            `<div class="ms-5 my-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="w-100">
+                  <p style="font-size: 0.8rem; margin-bottom: 0rem;">
+                    <a href="/accounts/${response.data.user_pk}/">${response.data.nickname}</a> | ${newDateFormat}
+                  </p>
+                  <p style="margin-bottom: 0rem;">${response.data.content}</p>
+                </div>
+  
+                <a class="like-heart mt-2 mx-2" href="">
+                  {% if request.user in comment.like_users.all %}
+                    <i data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
+                  {% else %}
+                    <i data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart btn-comment-like"></i>
+                  {% endif %}
+                </a>
+                
+                <form data-article-id="${articleId}" data-comment-id="${commentId}" class="comment-delete-forms d-inline mt-1">
+                  {% csrf_token %}
+                  <button class="btn btn-none border-0 p-0" type="submit">
+                  <img src="{% static 'images/bin.png' %}" style="width: 24px">
+                  </button>
+                </form>
+              </div>
+  
+              <div class="d-flex mb-0" style="font-size: 0.7rem;">
+                <p class="mb-0">좋아요 <span id="comment-${commentId}-like-count">${response.data.commentLikeCount}</span>개</p>
+              </div>
+            </div>
+            `
+          )
+
+          form.reset()
+        })
+      })
+    })
+
+    // 댓글 삭제
+    const commentDeleteForms = document.querySelectorAll('.comment-delete-forms')
+    commentDeleteForms.forEach(form => {
+      form.addEventListener('submit', event => {
+        event.preventDefault()
+        const articleId = event.target.dataset.articleId
+        const commentId = event.target.dataset.commentId
+
+        axios({
+          method: 'post',
+          url: `/${articleId}/comments/${commentId}/delete/`,
+          headers: {'X-CSRFToken': csrfToken},
+        })
+        .then(response => {
+          const comment = document.querySelector(`#comment-${commentId}`)
+          const is_deleted = response.data.is_deleted
+          const is_parent = response.data.is_parent
+          const commentCount = document.querySelectorAll('.comment-count')
+
+          commentCount.forEach(cnt => {
+            cnt.innerText = response.data.commentCount
+          })
+
+          if (is_deleted === true) {
+            comment.remove()
+
+            if (is_parent === true) {
+              const repliesBox = document.querySelector(`#replies-box-${response.data.parent_comment_pk}`)
+              console.log(repliesBox)
+              repliesBox.remove()
+            }
+          }
         })
       })
     })
