@@ -1,12 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.clickjacking import xframe_options_exempt
 from django.http import JsonResponse
 from .models import *
 from .forms import *
 from django.db.models import Q
-from django.contrib.auth import get_user_model
 
 
 # Create your views here.
@@ -244,25 +241,25 @@ def comment_delete(request, article_pk, comment_pk):
     return JsonResponse(data)
 
 
-@login_required
-def comment_update(request, comment_pk, article_pk):
-    comment = Comment.objects.get(pk=comment_pk)
-    com_form = CommentForm(instance=comment)
-    if request.user != comment.user:
-        from django.http import HttpResponseForbidden
+# @login_required
+# def comment_update(request, comment_pk, article_pk):
+#     comment = Comment.objects.get(pk=comment_pk)
+#     com_form = CommentForm(instance=comment)
+#     if request.user != comment.user:
+#         from django.http import HttpResponseForbidden
 
-        return HttpResponseForbidden()
-    if request.method == "POST":
-        comment_form = CommentForm(request.POST, instance=comment)
-        if comment_form.is_valid():
-            comment_form.save()
-            return redirect("articles:detail", article_pk)
-    # else:
-    #     form = CommentForm(instance=comment)
-    context = {
-        "com_form": com_form,
-    }
-    return render(request, "articles/comment_update.html", context)
+#         return HttpResponseForbidden()
+#     if request.method == "POST":
+#         comment_form = CommentForm(request.POST, instance=comment)
+#         if comment_form.is_valid():
+#             comment_form.save()
+#             return redirect("articles:detail", article_pk)
+#     # else:
+#     #     form = CommentForm(instance=comment)
+#     context = {
+#         "com_form": com_form,
+#     }
+#     return render(request, "articles/comment_update.html", context)
 
 
 @login_required
