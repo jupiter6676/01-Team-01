@@ -33,11 +33,9 @@
           <div>
             <hr class="mt-2">
             <p>{{ article.content }}</p>
-            {% if article.photo %}
-              
-              <img src="{{ article.photo.url }}" alt="{{ article.photo }}">
-              
-            {% endif %}
+            {% for photo in article.photo_set.all %}
+              <img src="{{ photo.image.url }}" alt="{{ photo.image }}">
+            {% endfor %}
           </div>
 
           <!-- 좋아요 버튼 -->
