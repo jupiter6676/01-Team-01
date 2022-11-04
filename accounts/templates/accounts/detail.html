@@ -55,20 +55,16 @@
         </div>
         <hr>
         <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 20px">
-
-          <div>
           <a id="link_user_articles" data-bs-toggle="collapse" href="#user_articles" role="button" aria-expanded="false" aria-controls="collapseExample">내 게시글</a>
           <a id="link_like_articles" data-bs-toggle="collapse" href="#like_articles" role="button" aria-expanded="false" aria-controls="collapseExample">좋아요</a>
-          </div>
+          <div id="button_feed_bookmark_list" style="cursor: pointer;margin: 0 30px;display: flex; flex-direction: row;align-items: center">북마크</div>
         <p class="text-muted m-0">
           <span class="me-3">팔로잉 <span id="followings-count">{{ user.followings.all|length }}</span>명</span>
-          <span>팔로워 <span id="followers-count">{{ user.followers.all|length }}</span>명</span>        
-              </div>
+          <span>팔로워 <span id="followers-count">{{ user.followers.all|length }}</span>명</span>
         </p>
       </div>
     </div>
   </div>
-
 
   <!-- 글 목록 -->
   <div>
@@ -118,9 +114,7 @@
                       <span class="">{{ article.comment_set.all.count }}</span>
                     </span>
                     <span class="bi bi-eye-fill"> 
-                      <span class="">{{ article.view_count }}</span>
                       <span class=""></span>
-
                     </span>
                   </div>
                 </div>
@@ -177,7 +171,6 @@
                       <span class="">{{ article.comment_set.all.count }}</span>
                     </span>
                     <span class="bi bi-eye-fill"> 
-                      <span class="">{{ article.view_count }}</span>
                       <span class=""></span>
                     </span>
                   </div>
@@ -223,29 +216,6 @@
             followBtn.classList.remove('btn-secondary')
           }
 
-
-        axios({
-          method: "post",
-          url: `/accounts/${userId}/follow/`,
-          headers: {
-            'X-CSRFToken': csrf_token
-          }
-        })
-        .then((response) => {
-          const followersCount = response.data.followers_count
-          const followingsCount = response.data.followings_count
-          const isFollowed = response.data.is_followed
-          const followBtn = document.querySelector('#follow-form > input[type=submit]')
-          if (isFollowed === true) {
-            followBtn.value = '언팔로우'
-            followBtn.classList.add('btn-secondary')
-            followBtn.classList.remove('btn-primary')
-          } else {
-            followBtn.value = '팔로우'
-            followBtn.classList.add('btn-primary')
-            followBtn.classList.remove('btn-secondary')
-          }
-
           const followersCountTag = document.querySelector('#followers-count')
           const followingsCountTag = document.querySelector('#followings-count')
           followersCountTag.innerText = followersCount
@@ -259,7 +229,6 @@
     const user_articles = document.querySelector('#user_articles')
     const like_articles = document.querySelector('#like_articles')
 
-  
     const bsCollapse = new bootstrap.Collapse('#like_articles', {
       toggle: false
     })
@@ -267,13 +236,11 @@
       toggle: false
     })
 
-    
     user_articles.addEventListener('show.bs.collapse', event => {
       bsCollapse.hide()
     })
     like_articles.addEventListener('show.bs.collapse', event => {
       bsCollapse2.hide()
     })
-    
   </script>
 {% endblock script %}
