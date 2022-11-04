@@ -13,8 +13,15 @@ urlpatterns = [
     path("<int:pk>/like/", views.like, name="like"),
     path("<int:pk>/bookmark/", views.bookmark, name="bookmark"),
     path("<int:pk>/comments/", views.comment_create, name="comment_create"),
-    path("<int:article_pk>/comments/<int:comment_pk>/delete/", views.comment_delete, name='comment_delete'),
-    path("<int:article_pk>/comments/<int:comment_pk>/update/", views.comment_update, name='comment_update'),
-    path("<int:article_pk>/comments/<int:comment_pk>/like/", views.comment_like, name="comment_like"),
+    path(
+        "<int:article_pk>/comments/<int:comment_pk>/delete/",
+        views.comment_delete,
+        name="comment_delete",
+    ),
+    path(
+        "<int:article_pk>/comments/<int:comment_pk>/like/",
+        views.comment_like,
+        name="comment_like",
+    ),
     path("search/", views.search, name="search"),
 ]
