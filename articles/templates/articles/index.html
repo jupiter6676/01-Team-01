@@ -54,7 +54,12 @@
               </div>
 
               <a href="{% url 'articles:detail' article.pk %}" class="text-dark">
-                <h4 class="card-title mb-3">{{ article.title }}</h4>
+              <div class="d-flex justify-content-between"><h4 class="card-title mb-3">{{ article.title }}</h4>
+                <div><svg width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2.31055C6.81525 2.31194 5.67942 2.78321 4.84166 3.62096C4.00391 4.45871 3.53265 5.59454 3.53125 6.7793C3.52984 7.74748 3.84609 8.6894 4.4315 9.46055C4.4315 9.46055 4.55338 9.62102 4.57329 9.64417L8 13.6855L11.4283 9.64214C11.4462 9.62061 11.5685 9.46055 11.5685 9.46055L11.5689 9.45933C12.154 8.68851 12.4701 7.74704 12.4688 6.7793C12.4674 5.59454 11.9961 4.45871 11.1583 3.62096C10.3206 2.78321 9.18476 2.31194 8 2.31055ZM9.4625 8.81055L8 7.87983L6.5375 8.81055L6.78125 7.15548L5.5625 6.03708L7.26875 5.83111L8 4.3418L8.77675 5.83152L10.4375 6.03708L9.21875 7.15548L9.4625 8.81055Z" fill="#0060FF"></path></svg>
+          <span class="text-b3 text-primary">{{article.location}}</span></div>
+                
+              </div>
+                
               </a>
 
               <div class="hashtags col-lg-8 col-md-10 mb-2">
