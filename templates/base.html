@@ -42,7 +42,7 @@
                   {% endif %}
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#">커뮤니티</a>
+                  <a class="nav-link" href="{% url 'community:index' %}">커뮤니티</a>
                 </li>
 
                 {% if request.user.is_authenticated %}

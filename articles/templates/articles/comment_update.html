@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load widget_tweaks %}
+{% load mathfilters %}
+{% load static %}
+
+{% block content %}
+
+  <form action="" method="POST">
+    {% csrf_token %}
+    {% bootstrap_form com_form %}
+    <div class="d-flex justify-content-end">
+      <input class="btn btn-sm btn-outline-primary" type="submit" value="등록">
+    </div>
+  </form>
+  {% endblock content %}

@@ -149,32 +149,37 @@ def update(request, pk):
 
 def like(request, pk):
     article = Article.objects.get(pk=pk)
-    if request.user in article.like_users.all():
+
+    if article.like_users.filter(pk=request.user.pk).exists():
         article.like_users.remove(request.user)
+        is_liked = False
     else:
         article.like_users.add(request.user)
-    return redirect("articles:detail", pk)
+        is_liked = True
+
+    data = {
+        "isLiked": is_liked,
+        "likeCount": article.like_users.count(),
+    }
+
+    return JsonResponse(data)
 
 
 def bookmark(request, pk):
     article = Article.objects.get(pk=pk)
+    
     if request.user in article.bookmark_users.all():
         article.bookmark_users.remove(request.user)
+        is_bookmarked = False
     else:
         article.bookmark_users.add(request.user)
-    return redirect("articles:detail", pk)
+        is_bookmarked = True
 
+    data = {
+        "isBookmarked": is_bookmarked,
+    }
 
-# @xframe_options_exempt
-# def comment_index(request, article_pk):
-#     article = Article.objects.get(pk=article_pk)
-#     comment_form = CommentForm()
-#     context = {
-#         "article": article,
-#         "comments": article.comment_set.all(),
-#         "comment_form": comment_form,
-#     }
-#     return render(request, "articles/comment_index.html", context)
+    return JsonResponse(data)
 
 
 @login_required
@@ -202,8 +207,9 @@ def comment_delete(request, article_pk, comment_pk):
 
 
 @login_required
-def comment_update(request, article_pk, comment_pk):
+def comment_update(request, comment_pk, article_pk):
     comment = Comment.objects.get(pk=comment_pk)
+    com_form = CommentForm(instance=comment)
     if request.user != comment.user:
         from django.http import HttpResponseForbidden
 
@@ -213,11 +219,10 @@ def comment_update(request, article_pk, comment_pk):
         if comment_form.is_valid():
             comment_form.save()
             return redirect("articles:detail", article_pk)
-    else:
-        form = CommentForm(instance=comment)
+    # else:
+    #     form = CommentForm(instance=comment)
     context = {
-        "comment": comment,
-        "comment_form": comment_form,
+        "com_form": com_form,
     }
     return render(request, "articles/comment_update.html", context)
 
@@ -226,11 +231,20 @@ def comment_update(request, article_pk, comment_pk):
 def comment_like(request, article_pk, comment_pk):
     comment = get_object_or_404(Comment, pk=comment_pk)
     article = Article.objects.get(pk=article_pk)
+
     if request.user in comment.like_users.all():
         comment.like_users.remove(request.user)
+        is_liked = False
     else:
         comment.like_users.add(request.user)
-    return redirect("articles:detail", article_pk)
+        is_liked = True
+
+    data = {
+        "isLiked": is_liked,
+        "likeCount": comment.like_users.count(),
+    }
+
+    return JsonResponse(data)
 
 
 # 검색

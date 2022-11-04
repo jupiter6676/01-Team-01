@@ -15,6 +15,7 @@ class Article(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    location = models.CharField(max_length=80, blank=True)
     tags = TaggableManager(blank=True)
     modify_dt = models.DateTimeField("MODIFY DATE", auto_now=True)
     like_users = models.ManyToManyField(

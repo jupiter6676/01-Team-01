@@ -2,16 +2,17 @@ from django import forms
 from .models import *
 from django.forms import ClearableFileInput
 
-
-class ArticleForm(forms.ModelForm):
+class ArticlesForm(forms.ModelForm):
     class Meta:
-        model = Article
+        model = Articles
         fields = [
             "title",
             "content",
-            "location",
         ]
-
+        labels = {
+            "title": "제목",
+            "content": "내용",
+        }
 
 class PhotoForm(forms.ModelForm):
     class Meta:
@@ -21,19 +22,13 @@ class PhotoForm(forms.ModelForm):
             "image": ClearableFileInput(attrs={"multiple": True}),
         }
 
-
-class CommentForm(forms.ModelForm):
+class CommentsForm(forms.ModelForm):
     content = forms.CharField(
         label="",
-        widget=forms.TextInput(
-            attrs={
-                "placeholder": "댓글을 작성해주세요.",
-            }
-        ),
+        widget=forms.TextInput(attrs={
+            "placeholder": "댓글을 작성해주세요.",
+        })
     )
-
     class Meta:
-        model = Comment
-        fields = [
-            "content",
-        ]
+        model = Comments
+        fields = ['content',]
