@@ -103,7 +103,7 @@
             {% csrf_token %}
             <div class="d-flex">
               {{ comment_form.content|add_class:'form-control' }}
-              <input class="btn btn-sm btn-outline-primary" type="submit" value="등록">
+              <input class="btn btn-sm btn-outline-primary ms-2" type="submit" value="등록">
             </div>
           </form>
         {% else %}
@@ -152,9 +152,35 @@
                   <p style="font-size: 0.8rem; margin-bottom: 0rem;">
                     <a href="{% url 'accounts:detail' article.user.pk %}">{{ reply.user.username }}</a> | {{ reply.created_at|date:'Y-m-d H:i' }}
                   </p>
+
+                  <div class="d-flex justify-content-end mt-2">
+                    {% if request.user.is_authenticated %}
+                      <a class="like-heart mt-2 mx-2" href="">
+                        {% if request.user in reply.like_users.all %}
+                          <i data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
+                        {% else %}
+                          <i data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart btn-comment-like"></i>
+                        {% endif %}
+                      </a>
+                    {% else %}
+                      <a href="{% url 'accounts:login' %}" class="mx-2">
+                        <i class="bi bi-heart"></i>
+                      </a>
+                    {% endif %}
+                    {% if user == reply.user %}
+                      <form action="{% url 'articles:comment_delete' article.pk reply.pk %}" method="POST" class="d-inline mt-1">
+                        {% csrf_token %}
+                        <button class="btn btn-none border-0 p-0" type="submit">
+                        <img src="{% static 'images/bin.png' %}" style="width: 24px">
+                        </button>
+                      </form>
+                    {% else %}
+                    {% endif %}
+                  </div>
+
                   <p style="margin-bottom: 0rem;">{{ reply.content }}</p>
                   <div class="d-flex mb-0" style="font-size: 0.7rem;">
-                    <p class="mx-3 mb-0">좋아요 {{ reply.like_users.count }}개</p>
+                    <p class="mx-3 mb-0">좋아요 <span id="comment-{{ reply.pk }}-like-count">{{ reply.like_users.count }}</span>개</p>
                   </div>
                 {% endif %}
               {% endfor %}
@@ -194,37 +220,25 @@
           </div>
         </div>
         {% empty %}
-        <p>댓글이 아직 없어요.</p>
+        <p class="my-3">댓글이 아직 없어요.</p>
       {% endfor %}
     </div>
 
     <!-- 글 수정 & 삭제 & 뒤로가기 -->
     <div class='d-flex justify-content-end'>
       {% if request.user == article.user %}
-      <form action="{% url 'articles:delete' article.pk %}" method="POST" class="form">
-        {% csrf_token %}
+        <form action="{% url 'articles:delete' article.pk %}" method="POST" class="form">
+          {% csrf_token %}
+          <div class="d-flex d-lg-none">
+            <a href="{% url 'articles:update' article.pk %}" class="btn btn-outline-primary form-control mb-3 me-2">수정</a>
+            <input class="btn btn-outline-danger form-control mb-3 me-2" type="submit" value="삭제">
+            <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary form-control mb-3">뒤로</a>
+          </div>
+        </form>
+      {% else %}
         <div class="d-block d-lg-none">
-          <a href="{% url 'articles:update' article.pk %}" class="btn btn-outline-primary form-control mb-3">수정</a>
-          <input class="btn btn-outline-danger form-control mb-3" type="submit" value="삭제">
           <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary form-control mb-3">뒤로</a>
         </div>
-        <div class="d-none d-lg-block">
-          <a href="{% url 'articles:update' article.pk %}" class="btn btn-outline-primary">수정</a>
-          <input class="btn btn-outline-danger" type="submit" value="삭제">
-          <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary">뒤로</a>
-        </div>
-      </form>
-      {% else %}
-      <div class="d-block d-lg-none">
-        <!-- <button class="btn btn-outline-primary form-control mb-3 disabled">수정</button>
-        <button class="btn btn-outline-danger form-control mb-3 disabled">삭제</button> -->
-        <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary form-control mb-3">뒤로</a>
-      </div>
-      <div class="d-none d-lg-block">
-        <!-- <button class="btn btn-outline-primary disabled">수정</button>
-        <button class="btn btn-outline-danger disabled">삭제</button> -->
-        <a href="{% url 'articles:index' %}" class="btn btn-outline-secondary">뒤로</a>
-      </div>
       {% endif %}
     </div>
   </div>
@@ -244,7 +258,7 @@
         url: `/${articleId}/like/`
       })
       .then(response => {
-        if (reponse.data.isLiked === true) {
+        if (response.data.isLiked === true) {
           event.target.classList.add('bi-heart-fill')
           event.target.classList.remove('bi-heart')
         } else {
@@ -289,7 +303,7 @@
           url: `/${articleId}/comments/${commentId}/like/`
         })
         .then(response => {
-          if (reponse.data.isLiked === true) {
+          if (response.data.isLiked === true) {
             event.target.classList.add('bi-heart-fill')
             event.target.classList.remove('bi-heart')
           } else {
@@ -299,26 +313,6 @@
           const commentLikeCount = document.querySelector(`#comment-${commentId}-like-count`)
           commentLikeCount.innerText = response.data.likeCount
         })
-      })
-    })
-
-    btnArticleLike.addEventListener('click', event => {
-      const articleId = event.target.dataset.articleId
-
-      axios({
-        method: 'get',
-        url: `/${articleId}/like/`
-      })
-      .then(response => {
-        if (reponse.data.isLiked === true) {
-          event.target.classList.add('bi-heart-fill')
-          event.target.classList.remove('bi-heart')
-        } else {
-          event.target.classList.add('bi-heart')
-          event.target.classList.remove('bi-heart-fill')
-        }
-        const articleLikeCount = document.querySelector('#article-like-count')
-        articleLikeCount.innerText = response.data.likeCount
       })
     })
   </script>
