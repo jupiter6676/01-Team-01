@@ -37,6 +37,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     "accounts",
     "articles",
+    "community",
     "django_bootstrap5",
     "django_extensions",
     "imagekit",
