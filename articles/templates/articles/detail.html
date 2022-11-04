@@ -53,34 +53,41 @@
         </div>
 
         <!-- 좋아요 댓글 북마크 아이콘 -->
-        <div class="d-flex justify-content-between">
-          <div style="font-size: 20px;">
-            <span>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex flex-row align-items-center" style="font-size: 20px;">
+            <div>
               {% if request.user.is_authenticated %}
-                <a href="{% url 'articles:like' article.pk %}">
-                {% if request.user in article.like_users.all %}
-                  <i class="bi-heart-fill bi"></i>
-                {% else %}
-                  <i class="bi-heart bi"></i>
-                {% endif %}</a>{{ article.like_users.count }}</span>
-              {% else %}
-              <a href="{% url 'accounts:login' %}"><i class="bi bi-heart"><span id="like-count"> {{ comment.like_users.count }}</span></i></a>
-              {% endif %}
-            </span>
-            <span class="mx-3"><i class="bi bi-chat"></i> {{ article.comment_set.all.count }}</span>
-          </div>
-          <div style="font-size: 20px;">
-            <span style="font-size: 20px;">
-              {% if request.user.is_authenticated %}
-                <a href="{% url 'articles:bookmark' article.pk %}">
-                  {% if request.user in article.bookmark_users.all %}
-                    <i class="bi bi-bookmark-fill"></i>
+                <a href="">
+                  {% if request.user in article.like_users.all %}
+                    <i id="btn-article-like" data-article-id="{{ article.pk }}" class="bi bi-heart-fill text-danger"></i>
                   {% else %}
-                    <i class="bi bi-bookmark"></i>
+                    <i id="btn-article-like" data-article-id="{{ article.pk }}" class="bi bi-heart text-dark"></i>
                   {% endif %}
                 </a>
               {% else %}
-              <a href="{% url 'accounts:login' %}"><i class="bi bi-bookmark"></i></a>
+                <a href="{% url 'accounts:login' %}"><i class="bi bi-heart"></i></a>
+              {% endif %}
+              <span id="article-like-count">{{ article.like_users.count }}</span>
+            </div>
+
+            <div class="ms-3">
+              <i class="bi bi-chat"> </i>
+              <span id="comment-count">{{ article.comment_set.all.count }}</span>
+            </div>
+          </div>
+
+          <div style="font-size: 20px;">
+            <span style="font-size: 20px;">
+              {% if request.user.is_authenticated %}
+                <a href="">
+                  {% if request.user in article.bookmark_users.all %}
+                    <i id="btn-bookmark" data-article-id="{{ article.pk }}" class="bi bi-bookmark-fill"></i>
+                  {% else %}
+                    <i id="btn-bookmark" data-article-id="{{ article.pk }}" class="bi bi-bookmark"></i>
+                  {% endif %}
+                </a>
+              {% else %}
+                <a href="{% url 'accounts:login' %}"><i class="bi bi-bookmark"></i></a>
               {% endif %}
             </span>
           </div>
@@ -90,12 +97,12 @@
 
       <!-- 댓글 입력 창 -->
       <div>
-        <h5 class="my-3">댓글 ({{ comments|length }})</h5>
+        <h5 class="my-3">댓글 <span id="comment-count">{{ article.comment_set.all.count }}</span></h5>
         {% if request.user.is_authenticated %}
           <form action="{% url 'articles:comment_create' article.pk %}" method="POST">
             {% csrf_token %}
-            {% bootstrap_form comment_form %}
-            <div class="d-flex justify-content-end">
+            <div class="d-flex">
+              {{ comment_form.content|add_class:'form-control' }}
               <input class="btn btn-sm btn-outline-primary" type="submit" value="등록">
             </div>
           </form>
@@ -116,7 +123,7 @@
               <a href="#replyBox{{ comment.pk }}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseExample">
                 답글 달기
               </a>
-              <p class="mx-3 mb-0">좋아요 {{ comment.like_users.count }}개</p>
+              <p class="mx-3 mb-0">좋아요 <span id="comment-{{ comment.pk }}-like-count">{{ comment.like_users.count }}</span>개</p>
             </div>
 
             <!-- 답글 창 펼치기 -->
@@ -153,37 +160,37 @@
               {% endfor %}
             </div>
           </div>
+
           <div class="d-flex justify-content-end mt-2">
-          {% if request.user.is_authenticated %}
-            <a class="like-heart mt-2 mx-2" href="{% url 'articles:comment_like' article.pk comment.pk %}">
-            {% if request.user in comment.like_users.all %}
-              <i class="bi bi-heart-fill"></i>
+            {% if request.user.is_authenticated %}
+              <a class="like-heart mt-2 mx-2" href="">
+                {% if request.user in comment.like_users.all %}
+                  <i data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
+                {% else %}
+                  <i data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart btn-comment-like"></i>
+                {% endif %}
+              </a>
             {% else %}
-              <i class="bi bi-heart"></i>
+              <a href="{% url 'accounts:login' %}" class="mx-2">
+                <i class="bi bi-heart"></i>
+              </a>
             {% endif %}
-            </a>
-          {% else %}
-            <a href="{% url 'accounts:login' %}" class="mx-2">
-              <i class="bi bi-heart"></i>
-            </a>
-          {% endif %}
-          {% if user == comment.user %}
+            {% if user == comment.user %}
           <!-- 댓글 수정 버튼 -->
    
               <a class="btn btn-none border-0 p-0 me-2" href="{% url 'articles:comment_update' article.pk comment.pk %}">
                 <img src="{% static 'image/edit.png' %}" style="width: 20px"></a>
               </button>
             </form> 
-      
-          <!-- 댓글 삭제 버튼 -->
-            <form action="{% url 'articles:comment_delete' article.pk comment.pk %}" method="POST" class="d-inline mt-1">
-              {% csrf_token %}
-              <button class="btn btn-none border-0 p-0" type="submit">
-              <img src="{% static 'images/bin.png' %}" style="width: 24px">
-              </button>
-            </form>
-          {% else %}
-          {% endif %}
+            <!-- 댓글 삭제 버튼 -->
+              <form action="{% url 'articles:comment_delete' article.pk comment.pk %}" method="POST" class="d-inline mt-1">
+                {% csrf_token %}
+                <button class="btn btn-none border-0 p-0" type="submit">
+                <img src="{% static 'images/bin.png' %}" style="width: 24px">
+                </button>
+              </form>
+            {% else %}
+            {% endif %}
           </div>
         </div>
         {% empty %}
@@ -224,3 +231,95 @@
 </div>
 
 {% endblock content %}
+
+{% block script %}
+  <script>
+    // 게시글 좋아요
+    const btnArticleLike = document.querySelector('#btn-article-like')
+    btnArticleLike.addEventListener('click', event => {
+      const articleId = event.target.dataset.articleId
+
+      axios({
+        method: 'get',
+        url: `/${articleId}/like/`
+      })
+      .then(response => {
+        if (reponse.data.isLiked === true) {
+          event.target.classList.add('bi-heart-fill')
+          event.target.classList.remove('bi-heart')
+        } else {
+          event.target.classList.add('bi-heart')
+          event.target.classList.remove('bi-heart-fill')
+        }
+        const articleLikeCount = document.querySelector('#article-like-count')
+        articleLikeCount.innerText = response.data.likeCount
+      })
+    })
+
+    // 게시글 북마크
+    const btnBookmark = document.querySelector('#btn-bookmark')
+    btnBookmark.addEventListener('click', event => {
+      const articleId = event.target.dataset.articleId
+
+      axios({
+        method: 'get',
+        url: `/${articleId}/bookmark/`
+      })
+      .then(response => {
+        if (response.data.isBookmarked === true) {
+          event.target.classList.add('bi-bookmark-fill')
+          event.target.classList.remove('bi-bookmark')
+        } else {
+          event.target.classList.add('bi-bookmark')
+          event.target.classList.remove('bi-bookmark-fill')
+        }
+      })
+    })
+
+    // 댓글 좋아요
+    const btnCommentLike = document.querySelectorAll('.btn-comment-like') // 모든 댓글의 좋아요 버튼들
+    btnCommentLike.forEach(btn => {
+      // 각 댓글의 좋아요 버튼에 클릭 이벤트 리스너 등록
+      btn.addEventListener('click', event => {
+        const articleId = event.target.dataset.articleId
+        const commentId = event.target.dataset.commentId
+
+        axios({
+          method: 'get',
+          url: `/${articleId}/comments/${commentId}/like/`
+        })
+        .then(response => {
+          if (reponse.data.isLiked === true) {
+            event.target.classList.add('bi-heart-fill')
+            event.target.classList.remove('bi-heart')
+          } else {
+            event.target.classList.add('bi-heart')
+            event.target.classList.remove('bi-heart-fill')
+          }
+          const commentLikeCount = document.querySelector(`#comment-${commentId}-like-count`)
+          commentLikeCount.innerText = response.data.likeCount
+        })
+      })
+    })
+
+    btnArticleLike.addEventListener('click', event => {
+      const articleId = event.target.dataset.articleId
+
+      axios({
+        method: 'get',
+        url: `/${articleId}/like/`
+      })
+      .then(response => {
+        if (reponse.data.isLiked === true) {
+          event.target.classList.add('bi-heart-fill')
+          event.target.classList.remove('bi-heart')
+        } else {
+          event.target.classList.add('bi-heart')
+          event.target.classList.remove('bi-heart-fill')
+        }
+        const articleLikeCount = document.querySelector('#article-like-count')
+        articleLikeCount.innerText = response.data.likeCount
+      })
+    })
+  </script>
+{% endblock script %}
