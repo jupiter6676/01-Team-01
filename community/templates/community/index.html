@@ -40,5 +40,43 @@
         <button type="button" class="btn btn-outline-primary">글쓰기</button>
       </a>
     </div>
+    <!--페이징-->
+    <ul class="pagination pagination justify-content-center">
+      <!--이전페이지-->
+      {% if articles.has_previous %}
+      <li class="page-item">
+        <a href="?page={{ articles.previous_page_number }}" class="page-link">이전</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <a href="#" class="page-link" aria-disabled="true">이전</a>
+      </li>
+      {% endif %}
+      <!--페이지리스트-->
+      {% for page_number in articles.paginator.page_range %}
+      {% if page_number >= articles.number|add:-5 and page_number <= articles.number|add:5 %}
+        {% if page_number == articles.number %}
+        <li class="page-item active" aria-current="page">
+          <a href="?page={{ page_number }}" class="page-link">{{ page_number }}</a>
+        </li>
+        {% else %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_number }}">{{ page_number }}</a>
+        </li>
+        {% endif %}
+      {% endif %}
+      {% endfor %}
+      <!--다음페이지-->
+      {% if articles.has_next %}
+      <li class="page-item">
+        <a href="?page={{ articles.next_page_number }}" class="page-link">다음</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <a href="#" class="page-link" aria-disabled="true">다음</a>
+      </li>
+      {% endif %}
+    </ul>
   </div>
+  
 {% endblock content %}

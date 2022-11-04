@@ -6,12 +6,16 @@ from .forms import *
 from .models import *
 from django.contrib import messages
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 
 # Create your views here.
 def index(request):
     articles = Articles.objects.order_by("-pk")
+    page = request.GET.get("page", "1")
+    paginator = Paginator(articles, 10)
+    page_obj = paginator.get_page(page)
     context = {
-        "articles" : articles,
+        "articles": page_obj,
     }
     return render(request, "community/index.html", context)
 
