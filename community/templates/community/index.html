@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+{% endblock css %}
+
+{% block content %}
+  <div class="container">
+    <div class="pt-4">
+      <div class="d-flex justify-content-center align-items-center">
+        <h1 class="mb-5">🌍🚂🛫🛬🧳🚀</h1>
+      </div>
+        <table class="table table-hover rounded-5" style="">
+        <thead style="background: #70d7e740; border-top: 0px solid #ccc; border-bottom: 2px solid #004af14a; font-weight: bold;">
+            <tr>
+            <th scope="col">번호</th>
+            <th scope="col">제목</th>
+            <th scope="col">작성일</th>
+            <th scope="col">작성자</th>
+            <th scope="col">조회수</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles %}
+            <tr>
+                <th scope="row" class="align-middle col-md-1">{{ forloop.revcounter }}</td>
+                <td class="align-middle col-md-8">
+                <a href="{% url 'community:detail' article.pk %}" class="text-decoration-none">{{ article.title }}</a> ({{ article.comments_set.all.count }})
+                </td>
+                <td class="align-middle col-md-1">{{ article.created_at|date:'m.d' }}</td>
+                <td class="align-middle col-md-1">{{ article.user.nickname }}</a></td>
+                <td class="align-middle col-md-1"></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+    <div class="d-flex justify-content-end">
+      <a href="{% url 'community:create' %}">
+        <button type="button" class="btn btn-outline-primary">글쓰기</button>
+      </a>
+    </div>
+  </div>
+{% endblock content %}
