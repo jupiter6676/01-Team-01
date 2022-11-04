@@ -160,18 +160,6 @@ def bookmark(request, pk):
     return redirect("articles:detail", pk)
 
 
-@xframe_options_exempt
-def comment_index(request, article_pk):
-    article = Article.objects.get(pk=article_pk)
-    comment_form = CommentForm()
-    context = {
-        "article": article,
-        "comments": article.comment_set.all(),
-        "comment_form": comment_form,
-    }
-    return render(request, "articles/comment_index.html", context)
-
-
 @login_required
 def comment_create(request, pk):
     article = Article.objects.get(pk=pk)
