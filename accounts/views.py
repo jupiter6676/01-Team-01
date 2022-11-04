@@ -56,7 +56,9 @@ def detail(request, pk):
     user = get_user_model().objects.get(pk=pk)
     articles = user.article_set.all()
     print(articles)
-    context = {"user": user, "articles": articles}
+    like_articles = user.like_articles.all()
+    print(like_articles)
+    context = {"user": user, "articles": articles, "like_articles": like_articles}
     return render(request, "accounts/detail.html", context)
 
 

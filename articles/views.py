@@ -63,9 +63,12 @@ def create(request):
 
 def detail(request, pk):
     article = Article.objects.get(pk=pk)
+    default_view_count = article.view_count
+    article.view_count = default_view_count + 1
+    article.save()
     comment_form = CommentForm()
     comments = article.comment_set.filter(parent_comment=None)
-    replies= article.comment_set.exclude(parent_comment=None)
+    replies = article.comment_set.exclude(parent_comment=None)
 
     context = {
         "article": article,
@@ -95,7 +98,7 @@ def update(request, pk):
     article = Article.objects.get(pk=pk)
     photos = Photo.objects.filter(article_id=article.pk)
     tags_ = article.tags.all()  # 기존에 있었던 태그(삭제)
-    
+
     if tags_:
         for tag in tags_:
             tag.delete()
@@ -108,7 +111,7 @@ def update(request, pk):
         tags = request.POST.get("tags", "").split(",")
 
         # Article.objects.filter(record_Id=1).update(city=None) #잔여물
-        
+
         for photo in photos:
             if photo.image:
                 photo.delete()
@@ -178,7 +181,7 @@ def bookmark(request, pk):
 def comment_create(request, pk):
     article = Article.objects.get(pk=pk)
     comment_form = CommentForm(request.POST)
-    parent_comment_id = request.POST.get('parent_comment_id', None)
+    parent_comment_id = request.POST.get("parent_comment_id", None)
 
     if comment_form.is_valid():
         comment = comment_form.save(commit=False)
@@ -203,6 +206,7 @@ def comment_update(request, article_pk, comment_pk):
     comment = Comment.objects.get(pk=comment_pk)
     if request.user != comment.user:
         from django.http import HttpResponseForbidden
+
         return HttpResponseForbidden()
     if request.method == "POST":
         comment_form = CommentForm(request.POST, instance=comment)
@@ -232,7 +236,9 @@ def comment_like(request, article_pk, comment_pk):
 # 검색
 def search(request):
     search_keyword = request.GET.get("search", "")
-    search_option = request.GET.get("search_option", "")    # title, title_content, hashtag, user
+    search_option = request.GET.get(
+        "search_option", ""
+    )  # title, title_content, hashtag, user
     articles = Article.objects.order_by("-pk")
 
     if search_keyword:
@@ -240,16 +246,23 @@ def search(request):
             search_articles = articles.filter(title__icontains=search_keyword)
         elif search_option == "title_content":
             # Q: ORM WHERE에서 or 연산을 수행
-            search_articles = articles.filter(Q(title__icontains=search_keyword) | Q(content__icontains=search_keyword))
+            search_articles = articles.filter(
+                Q(title__icontains=search_keyword)
+                | Q(content__icontains=search_keyword)
+            )
         elif search_option == "hashtag":
             # distinct(): 중복 제거
             # 만약 해시태그가 #1, #11, #111인 글이 하나 있고, 1을 검색하면
             # 같은 글이 3개가 보여짐.
-            search_articles = articles.filter(tags__name__icontains=search_keyword).distinct()
+            search_articles = articles.filter(
+                tags__name__icontains=search_keyword
+            ).distinct()
         elif search_option == "user":
             # ForeignKey icontains
             # {Article의 User field}__{User의 nickname field}__icontains
-            search_articles = articles.filter(Q(user__nickname__icontains=search_keyword))
+            search_articles = articles.filter(
+                Q(user__nickname__icontains=search_keyword)
+            )
 
     context = {
         "search_articles": search_articles,
