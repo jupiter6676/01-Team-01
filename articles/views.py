@@ -63,6 +63,9 @@ def create(request):
 
 def detail(request, pk):
     article = Article.objects.get(pk=pk)
+    default_view_count = article.view_count
+    article.view_count = default_view_count + 1
+    article.save()
     comment_form = CommentForm()
     comments = article.comment_set.filter(parent_comment=None)
     replies = article.comment_set.exclude(parent_comment=None)
