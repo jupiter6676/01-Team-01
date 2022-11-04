@@ -9,6 +9,7 @@ class ArticleForm(forms.ModelForm):
         fields = [
             "title",
             "content",
+            "location",
         ]
 
 
