@@ -146,20 +146,37 @@ def update(request, pk):
 
 def like(request, pk):
     article = Article.objects.get(pk=pk)
-    if request.user in article.like_users.all():
+
+    if article.like_users.filter(pk=request.user.pk).exists():
         article.like_users.remove(request.user)
+        is_liked = False
     else:
         article.like_users.add(request.user)
-    return redirect("articles:detail", pk)
+        is_liked = True
+
+    data = {
+        "isLiked": is_liked,
+        "likeCount": article.like_users.count(),
+    }
+
+    return JsonResponse(data)
 
 
 def bookmark(request, pk):
     article = Article.objects.get(pk=pk)
+    
     if request.user in article.bookmark_users.all():
         article.bookmark_users.remove(request.user)
+        is_bookmarked = False
     else:
         article.bookmark_users.add(request.user)
-    return redirect("articles:detail", pk)
+        is_bookmarked = True
+
+    data = {
+        "isBookmarked": is_bookmarked,
+    }
+
+    return JsonResponse(data)
 
 
 # @xframe_options_exempt
