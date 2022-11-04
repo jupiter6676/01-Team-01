@@ -23,7 +23,8 @@
         <tbody>
             {% for article in articles %}
             <tr>
-                <th scope="row" class="align-middle col-md-1">{{ forloop.revcounter }}</td>
+                <!-- <th scope="row" class="align-middle col-md-1">{{ forloop.revcounter }}</td> -->
+                <th scope="row" class="align-middle col-md-1">{{ article.pk }}</td>
                 <td class="align-middle col-md-8">
                 <a href="{% url 'community:detail' article.pk %}" class="text-decoration-none">{{ article.title }}</a> ({{ article.comments_set.all.count }})
                 </td>

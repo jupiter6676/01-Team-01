@@ -19,11 +19,11 @@
     <span class="text-primary">{{ user.nickname }}</span>님의 페이지</h1>
 
   <!-- 프로필 이미지, 닉네임, 유저네임, 소개글 -->
-  <div class="container d-grid p-3 rounded-4 border border-1 mb-5">
+  <div class="container d-grid p-3 rounded-4 border border-1 mb-5" style="background-color: white;">
     <div class="row row-cols-2 align-items-center">
       <div class="col-3">
         {% if user.profile.image %}
-        <img src="{{ user.profile.image.url }}" alt="" class="rounded-4 border border-1 w-100">
+          <img src="{{ user.profile.image.url }}" alt="" class="rounded-4 border border-1 w-100">
         {% else %}
           <img src="{% static 'images/dummy-image-square.jpg' %}" alt="" class="rounded-4 border border-1 w-100">
         {% endif %}
