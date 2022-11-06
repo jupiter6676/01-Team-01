@@ -52,13 +52,11 @@
           <div class="d-flex flex-row align-items-center" style="font-size: 20px;">
             <div>
               {% if request.user.is_authenticated %}
-                <a href="">
-                  {% if request.user in article.like_users.all %}
-                    <i id="btn-article-like" data-article-id="{{ article.pk }}" class="bi bi-heart-fill text-danger"></i>
-                  {% else %}
-                    <i id="btn-article-like" data-article-id="{{ article.pk }}" class="bi bi-heart text-dark"></i>
-                  {% endif %}
-                </a>
+                {% if request.user in article.like_users.all %}
+                  <i id="btn-article-like" data-article-id="{{ article.pk }}" class="bi bi-heart-fill text-danger"></i>
+                {% else %}
+                  <i id="btn-article-like" data-article-id="{{ article.pk }}" class="bi bi-heart text-dark"></i>
+                {% endif %}
               {% else %}
                 <a href="{% url 'accounts:login' %}"><i class="bi bi-heart"></i></a>
               {% endif %}
@@ -74,13 +72,11 @@
           <div style="font-size: 20px;">
             <span style="font-size: 20px;">
               {% if request.user.is_authenticated %}
-                <a href="">
-                  {% if request.user in article.bookmark_users.all %}
-                    <i id="btn-bookmark" data-article-id="{{ article.pk }}" class="bi bi-bookmark-fill"></i>
-                  {% else %}
-                    <i id="btn-bookmark" data-article-id="{{ article.pk }}" class="bi bi-bookmark"></i>
-                  {% endif %}
-                </a>
+                {% if request.user in article.bookmark_users.all %}
+                  <i id="btn-bookmark" data-article-id="{{ article.pk }}" class="bi bi-bookmark-fill"></i>
+                {% else %}
+                  <i id="btn-bookmark" data-article-id="{{ article.pk }}" class="bi bi-bookmark"></i>
+                {% endif %}
               {% else %}
                 <a href="{% url 'accounts:login' %}"><i class="bi bi-bookmark"></i></a>
               {% endif %}
@@ -119,13 +115,13 @@
               </div>
 
               {% if request.user.is_authenticated %}
-                <a class="like-heart mt-2 mx-2" href="">
+                <div class="like-heart mt-2 mx-2">
                   {% if request.user in comment.like_users.all %}
                     <i id="btn-comment-like" data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
                   {% else %}
                     <i id="btn-comment-like" data-article-id="{{ article.pk }}" data-comment-id="{{ comment.pk }}" class="bi bi-heart btn-comment-like"></i>
                   {% endif %}
-                </a>
+                </div>
               {% else %}
                 <a href="{% url 'accounts:login' %}" class="mx-2">
                   <i class="bi bi-heart"></i>
@@ -184,13 +180,13 @@
                     </div>
 
                     {% if request.user.is_authenticated %}
-                      <a class="like-heart mt-2 mx-2" href="">
+                      <div class="like-heart mt-2 mx-2">
                         {% if request.user in reply.like_users.all %}
                           <i id="btn-comment-like" data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart-fill btn-comment-like"></i>
                         {% else %}
                           <i id="btn-comment-like" data-article-id="{{ article.pk }}" data-comment-id="{{ reply.pk }}" class="bi bi-heart btn-comment-like"></i>
                         {% endif %}
-                      </a>
+                      </div>
                     {% else %}
                       <a href="{% url 'accounts:login' %}" class="mx-2">
                         <i class="bi bi-heart"></i>
