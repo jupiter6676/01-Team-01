@@ -12,23 +12,25 @@
       </div>
         <table class="table table-hover rounded-5" style="">
         <thead style="background: #70d7e740; border-top: 0px solid #ccc; border-bottom: 2px solid #004af14a; font-weight: bold;">
-            <tr>
+            <tr style="text-align: center;">
             <th scope="col">번호</th>
             <th scope="col">제목</th>
             <th scope="col">작성일</th>
             <th scope="col">작성자</th>
+            <th scope="col">조회수</th>
             </tr>
         </thead>
         <tbody>
             {% for article in articles %}
             <tr>
                 <!-- <th scope="row" class="align-middle col-md-1">{{ forloop.revcounter }}</td> -->
-                <th scope="row" class="align-middle col-md-1">{{ article.pk }}</td>
-                <td class="align-middle col-md-9">
-                <a href="{% url 'community:detail' article.pk %}" class="text-decoration-none">{{ article.title }}</a> ({{ article.comments_set.all.count }})
+                <th scope="row" class="align-middle col-md-1" style="text-align: center;">{{ article.pk }}</td>
+                <td class="align-middle col-md-7">
+                <a href="{% url 'community:detail' article.pk %}" class="text-decoration-none">{{ article.title }}</a><span class="text-muted"> ({{ article.comments_set.all.count }})</span>
                 </td>
-                <td class="align-middle col-md-1">{{ article.created_at|date:'m.d' }}</td>
-                <td class="align-middle col-md-1">{{ article.user.nickname }}</a></td>
+                <td class="align-middle col-md-1" style="text-align: center;">{{ article.created_at|date:'m.d' }}</td>
+                <td class="align-middle col-md-1" style="text-align: center;"><a href="{% url 'accounts:detail' article.user.pk %}">{{ article.user.nickname }}</a></a></td>
+                <td class="align-middle col-md-1" style="text-align: center;">{{ article.view_count }}</td>
             </tr>
             {% endfor %}
         </tbody>

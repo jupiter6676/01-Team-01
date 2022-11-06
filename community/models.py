@@ -15,6 +15,7 @@ class Articles(models.Model):
                                 processors=[ResizeToFill(400, 300)],
                                 format='JPEG', options={'quality': 90})
     like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='like_article')
+    view_count = models.IntegerField(default=0)
 
 class Photo(models.Model):
     article = models.ForeignKey(Articles, on_delete=models.CASCADE, null=True)
