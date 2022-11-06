@@ -19,6 +19,9 @@ def index(request):
 
 def detail(request, pk):
     article = get_object_or_404(Articles, pk=pk)
+    default_view_count = article.view_count
+    article.view_count = default_view_count + 1
+    article.save()
     comment_form = CommentsForm()
     comments = article.comments_set.filter(parent_comment=None)
     replies= article.comments_set.exclude(parent_comment=None)
@@ -153,7 +156,10 @@ def comment_create(request, pk):
 @login_required
 def comment_delete(request, article_pk, comment_pk):
     if request.user.is_authenticated:
+        article = Articles.objects.get(pk=article_pk)
         comment = Comments.objects.get(pk=comment_pk)
+        replies = article.comments_set.filter(parent_comment=comment)
+
         if request.user == comment.user:
             comment.delete()
     return redirect('community:detail', article_pk)

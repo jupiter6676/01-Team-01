@@ -53,136 +53,144 @@
           </div>
 
           <!-- 댓글창 -->
-          <h5 style="margin-bottom: 1rem;">댓글 ({{ article.comments_set.all.count }})</h5>
-          {% if request.user.is_authenticated %}
-          <form id="comment-form" action="{% url 'community:comment_create' article.pk %}" method="POST">
-              {% csrf_token %}
-            <div class="d-flex justify-content-end">
-              {{ comment_form.content|add_class:'form-control' }}
-              <input class="btn btn-sm btn-outline-primary ms-3" type="submit" value="등록">
-            </div>
-          </form>
-          {% else %}
-            <a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
-          {% endif %}
-          <hr>
+          <div>
+            <h5 style="margin-bottom: 1rem;">댓글 ({{ article.comments_set.all.count }})</h5>
+            {% if request.user.is_authenticated %}
+            <form id="comment-form" action="{% url 'community:comment_create' article.pk %}" method="POST">
+                {% csrf_token %}
+              <div class="d-flex justify-content-end">
+                {{ comment_form.content|add_class:'form-control' }}
+                <input class="btn btn-sm btn-outline-primary ms-3" type="submit" value="등록">
+              </div>
+            </form>
+            {% else %}
+              <a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
+            {% endif %}
+            <hr>
+          </div>
 
           <!-- 댓글 목록 -->
-          {% for comment in comments %}
-            <div class="mt-3 d-flex justify-content-between">
-              <div class="w-100">
-                <div class="d-flex justify-content-between">
-                  <div>
-                    <p style="font-size: 0.8rem; margin-bottom: 0rem;">
-                      <a href="{% url 'accounts:detail' article.user.pk %}">{{ comment.user.nickname }}</a> | {{ comment.created_at|date:'Y-m-d H:i' }}
-                    </p>
-                    <p style="margin-bottom: 0rem;">{{ comment.content }}</p>
-                  </div>
-                  <div class="d-flex justify-content-end mt-2">
-                    <!-- 댓글 좋아요 버튼 -->
-                  {% if request.user.is_authenticated %}
-                    <a class="like-heart mt-2 mx-2" href="{% url 'community:comment_like' article.pk comment.pk %}">
-                    {% if request.user in comment.like_users.all %}
-                      <i class="bi bi-heart-fill"></i>
-                    {% else %}
-                      <i class="bi bi-heart"></i>
-                    {% endif %}
-                    </a>
-                  {% else %}
-                    <a href="{% url 'accounts:login' %}" class="mx-2">
-                      <i class="bi bi-heart"></i>
-                    </a>
-                  {% endif %}
-                  {% if user == comment.user %}
-                    <!-- 댓글 삭제 버튼 -->
-                    <form action="{% url 'community:comment_delete' article.pk comment.pk %}" method="POST" class="d-inline mt-1">
-                      {% csrf_token %}
-                      <button class="btn btn-none border-0 p-0" type="submit">
-                        <img src="{% static 'images/bin.png' %}" style="width: 24px">
-                      </button>
-                    </form>
-                  {% else %}
-                  {% endif %}
-                  </div>
-                </div>
+          <div>
+            {% for comment in comments %}
+              <div class="mb-2 d-flex justify-content-between">
+                <div class="w-100">
+                  <div class="d-flex justify-content-between">
+                    <div class="w-100">
+                      <p style="font-size: 0.8rem; margin-bottom: 0rem;">
+                        <a href="{% url 'accounts:detail' article.user.pk %}">{{ comment.user.nickname }}</a> | {{ comment.created_at|date:'Y-m-d H:i' }}
+                      </p>
+                      <p style="margin-bottom: 0rem;">{{ comment.content }}</p>
+                    </div>
 
-                <div class="d-flex mb-0" style="font-size: 0.7rem;">
-                  <a href="#replyBox{{ comment.pk }}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseExample">
-                    답글 달기
-                  </a>
-                  <p class="mx-3 mb-0">좋아요 {{ comment.like_users.count }}개</p>
-                </div>
-                
-                <!-- 답글 창 펼치기 -->
-                <div class="collapse" id="replyBox{{ comment.pk }}">
-                  <div class="mt-2">
+                    <!-- 댓글 좋아요 버튼 -->
                     {% if request.user.is_authenticated %}
-                      <form action="{% url 'community:comment_create' article.pk %}" method="POST">
-                        {% csrf_token %}
-                        <input type="hidden" name="parent_comment_id" value="{{ comment.pk }}">
-                        
-                        <div class="d-flex" style="width: 100%;">
-                          {{ comment_form.content|add_class:'form-control' }}
-                          <input class="btn btn-sm btn-outline-primary ms-3" type="submit" value="등록">
-                        </div>
-                      </form>
+                      <a class="like-heart mt-2 mx-2" href="{% url 'community:comment_like' article.pk comment.pk %}">
+                      {% if request.user in comment.like_users.all %}
+                        <i class="bi bi-heart-fill"></i>
+                      {% else %}
+                        <i class="bi bi-heart"></i>
+                      {% endif %}
+                      </a>
                     {% else %}
-                      <a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
+                      <a href="{% url 'accounts:login' %}" class="mx-2">
+                        <i class="bi bi-heart"></i>
+                      </a>
+                    {% endif %}
+                      
+                    <!-- 댓글 삭제 버튼 -->
+                    {% if user == comment.user %}
+                      <form action="{% url 'community:comment_delete' article.pk comment.pk %}" method="POST" class="d-inline mt-1">
+                        {% csrf_token %}
+                        <button class="btn btn-none border-0 p-0" type="submit">
+                          <img src="{% static 'images/bin.png' %}" style="width: 24px">
+                        </button>
+                      </form>
                     {% endif %}
                   </div>
-                </div>
-                
-                <!-- 답글 목록 -->
-                  {% for reply in replies %}
-                    {% if reply.parent_comment == comment %}
-                    <div class="d-flex mt-2 justify-content-between">
-                      <div class="d-flex">
-                        <div class="pt-1 ps-2">
-                          <i class="bi bi-arrow-return-right"></i>
-                        </div>
-                        <div class="ms-3">
-                          <p style="font-size: 0.8rem; margin-bottom: 0rem;">
-                            <a href="{% url 'accounts:detail' article.user.pk %}">{{ reply.user.nickname }}</a> | {{ reply.created_at|date:'Y-m-d H:i' }}
-                          </p>
-                          <p style="margin-bottom: 0rem;">{{ reply.content }}</p>
-                        </div>
-                      </div>
-                      <div class="d-flex mt-2">
-                        <!-- 댓글 좋아요 버튼 -->
+  
+                  <div class="d-flex mb-0" style="font-size: 0.7rem;">
+                    <a href="#replyBox{{ comment.pk }}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseExample">
+                      답글 달기
+                    </a>
+                    <p class="mx-3 mb-0">좋아요 {{ comment.like_users.count }}개</p>
+                  </div>
+                  
+                  <!-- 답글 창 펼치기 -->
+                  <div class="collapse" id="replyBox{{ comment.pk }}">
+                    <div class="mt-2">
                       {% if request.user.is_authenticated %}
-                        <a class="like-heart mt-2 mx-2" href="{% url 'community:comment_like' article.pk comment.pk %}">
-                        {% if request.user in comment.like_users.all %}
-                          <i class="bi bi-heart-fill"></i>
-                        {% else %}
-                          <i class="bi bi-heart"></i>
-                        {% endif %}
-                        </a>
-                      {% else %}
-                        <a href="{% url 'accounts:login' %}" class="mx-2">
-                          <i class="bi bi-heart"></i>
-                        </a>
-                      {% endif %}
-                      {% if user == reply.user %}
-                        <!-- 댓글 삭제 버튼 -->
-                        <form action="{% url 'community:comment_delete' article.pk comment.pk %}" method="POST" class="d-inline mt-1">
+                        <form action="{% url 'community:comment_create' article.pk %}" method="POST">
                           {% csrf_token %}
-                          <button class="btn btn-none border-0 p-0" type="submit">
-                            <img src="{% static 'images/bin.png' %}" style="width: 24px">
-                          </button>
+                          <input type="hidden" name="parent_comment_id" value="{{ comment.pk }}">
+                          
+                          <div class="d-flex" style="width: 100%;">
+                            {{ comment_form.content|add_class:'form-control' }}
+                            <input class="btn btn-sm btn-outline-primary ms-3" type="submit" value="등록">
+                          </div>
                         </form>
                       {% else %}
+                        <a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
                       {% endif %}
-                      </div>
                     </div>
-                    
-                    {% endif %}
-                  {% endfor %}
-              </div>
+                  </div>
+                  
+                  <!-- 답글 목록 -->
+                    {% for reply in replies %}
+                      {% if reply.parent_comment == comment %}
+                      <div class="d-flex mt-2 justify-content-between">
+                        <div class="d-flex w-100">
+                          <div class="pt-1 ps-2">
+                            <i class="bi bi-arrow-return-right"></i>
+                          </div>
+                          <div class="ms-3 w-100">
+                            <p style="font-size: 0.8rem; margin-bottom: 0rem;">
+                              <a href="{% url 'accounts:detail' article.user.pk %}">{{ reply.user.nickname }}</a> | {{ reply.created_at|date:'Y-m-d H:i' }}
+                            </p>
+                            <p style="margin-bottom: 0rem;">{{ reply.content }}</p>
+                            <div class="d-flex mb-0" style="font-size: 0.7rem;">
+                              <p class="mb-0">좋아요 <span id="comment-{{ reply.pk }}-like-count">{{ reply.like_users.count }}</span>개</p>
+                            </div>
+                          </div>
+                        </div>
 
-            </div>
-            {% empty %}
-            <p>댓글이 아직 없어요.</p>
-          {% endfor %}
+                        <div class="d-flex mt-2">
+                          <!-- 댓글 좋아요 버튼 -->
+                        {% if request.user.is_authenticated %}
+                          <a class="like-heart mt-2 mx-2" href="{% url 'community:comment_like' article.pk comment.pk %}">
+                          {% if request.user in reply.like_users.all %}
+                            <i class="bi bi-heart-fill"></i>
+                          {% else %}
+                            <i class="bi bi-heart"></i>
+                          {% endif %}
+                          </a>
+                        {% else %}
+                          <a href="{% url 'accounts:login' %}" class="mx-2">
+                            <i class="bi bi-heart"></i>
+                          </a>
+                        {% endif %}
+
+                        <!-- 댓글 삭제 버튼 -->
+                        {% if user == reply.user %}
+                          <form action="{% url 'community:comment_delete' article.pk comment.pk %}" method="POST" class="d-inline mt-1">
+                            {% csrf_token %}
+                            <button class="btn btn-none border-0 p-0" type="submit">
+                              <img src="{% static 'images/bin.png' %}" style="width: 24px">
+                            </button>
+                          </form>
+                        {% endif %}
+                        </div>
+                      </div>
+
+
+                      {% endif %}
+                    {% endfor %}
+                </div>
+  
+              </div>
+              {% empty %}
+              <p>댓글이 아직 없어요.</p>
+            {% endfor %}
+          </div>
         </div>
 
         <!-- 글 수정 & 삭제 & 뒤로가기 -->
