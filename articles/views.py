@@ -38,14 +38,12 @@ def create(request):
                     article.save()
                     image_instance.save()
 
-            else:
-                article.save()
-
-                if tags:
-                    for tag in tags:
-                        tag = tag.strip()
-                        article.tags.add(tag)
-                        article.save()
+            article.save()
+            if tags:
+                for tag in tags:
+                    tag = tag.strip()
+                    article.tags.add(tag)
+                    article.save()
 
             return redirect("articles:index")
     else:
