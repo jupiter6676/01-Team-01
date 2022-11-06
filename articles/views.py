@@ -122,12 +122,12 @@ def update(request, pk):
                     image_instance = Photo(article=article, image=image)
                     article.save()
                     image_instance.save()
-            else:
+            
+            article.save()
+            for tag in tags:
+                tag = tag.strip()
+                article.tags.add(tag)
                 article.save()
-                for tag in tags:
-                    tag = tag.strip()
-                    article.tags.add(tag)
-                    article.save()
 
             return redirect("articles:index")
 
