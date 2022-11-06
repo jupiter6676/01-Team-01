@@ -17,7 +17,6 @@
             <th scope="col">제목</th>
             <th scope="col">작성일</th>
             <th scope="col">작성자</th>
-            <th scope="col">조회수</th>
             </tr>
         </thead>
         <tbody>
@@ -25,12 +24,11 @@
             <tr>
                 <!-- <th scope="row" class="align-middle col-md-1">{{ forloop.revcounter }}</td> -->
                 <th scope="row" class="align-middle col-md-1">{{ article.pk }}</td>
-                <td class="align-middle col-md-8">
+                <td class="align-middle col-md-9">
                 <a href="{% url 'community:detail' article.pk %}" class="text-decoration-none">{{ article.title }}</a> ({{ article.comments_set.all.count }})
                 </td>
                 <td class="align-middle col-md-1">{{ article.created_at|date:'m.d' }}</td>
                 <td class="align-middle col-md-1">{{ article.user.nickname }}</a></td>
-                <td class="align-middle col-md-1"></td>
             </tr>
             {% endfor %}
         </tbody>
