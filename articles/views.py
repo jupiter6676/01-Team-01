@@ -21,11 +21,12 @@ def create(request):
         article_form = ArticleForm(request.POST, request.FILES)
         photo_form = PhotoForm(request.POST, request.FILES)
         images = request.FILES.getlist("image")
-
-        if request.POST.get("tags", "") != "":
-            tags = request.POST.get("tags", "").split(",")
-        else:
-            tags = None
+        tags = request.POST.get("tags", "").split(",")
+        
+        # if request.POST.get("tags", "") != "":
+        #     tags = request.POST.get("tags", "").split(",")
+        # else:
+        #     tags = None
 
         if article_form.is_valid() and photo_form.is_valid():
             article = article_form.save(commit=False)
