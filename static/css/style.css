@@ -17,3 +17,12 @@ a {
 body {
     background-color: #70d7e740;
 }
+
+
+.glow {
+    transition: all 0.2s ease-in-out;
+  }
+
+.glow:hover {
+    box-shadow: 0px 0px 15px rgb(79 133 197 / 52%);
+}

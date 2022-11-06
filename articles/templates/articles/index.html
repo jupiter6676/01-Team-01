@@ -36,7 +36,7 @@
     {% for article in articles %}
       <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3">
         <a href="{% url 'articles:detail' article.pk %}">
-          <div class="card">
+          <div class="card glow">
             <!-- 첫 번째 이미지를 썸네일로 -->
             {% if article.photo_set.all.0.image %}
               <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="300px">
