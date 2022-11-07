@@ -114,6 +114,7 @@
                 <p style="margin-bottom: 0rem;">{{ comment.content }}</p>
               </div>
 
+              <!-- 좋아요 (나중에 폼으로 만들기) -->
               {% if request.user.is_authenticated %}
                 <div class="like-heart mt-2 mx-2">
                   {% if request.user in comment.like_users.all %}
