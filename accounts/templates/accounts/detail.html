@@ -112,14 +112,13 @@
                   <div class="d-flex justify-content-between align-items-center">
                     <div class="text-muted fs-6">
                       {% if request.user.is_authenticated %}
-                        <form class="like-forms d-inline" data-article-id="{{ article.pk }}">
-                          {% csrf_token %}
+                        <div class="like-forms d-inline" data-article-id="{{ article.pk }}">
                           {% if request.user in article.like_users.all %}
-                            <button type="submit" id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></button>
+                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></i>
                           {% else %}
-                            <button type="submit" id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></button>
+                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></i>
                           {% endif %}
-                        </form>
+                        </div>
                         <span id="like-{{ article.pk }}-count" class="text-muted me-3">{{ article.like_users.count }}</span>
                       {% endif %}
 
@@ -133,13 +132,13 @@
 
                     <div>
                       {% if request.user.is_authenticated %}
-                        <form class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
+                        <div class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
                           {% if request.user in article.bookmark_users.all %}
-                            <button type="submit" id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></button>
+                            <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></i>
                           {% else %}
-                            <button type="submit" id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></button>
+                            <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></i>
                           {% endif %}
-                        </form>
+                        </div>
                       {% endif %}
                     </div>
                   </div>
@@ -155,7 +154,7 @@
     <div class="collapse" id="like_articles">
       <div class="row">
         {% for article in like_articles %}
-          <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3">
+          <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3" id="like-{{ article.pk }}">
             <a href="{% url 'articles:detail' article.pk %}">
               <div class="card glow">
                 <!-- 첫 번째 이미지를 썸네일로 -->
@@ -195,14 +194,13 @@
                   <div class="d-flex justify-content-between align-items-center">
                     <div class="text-muted fs-6">
                       {% if request.user.is_authenticated %}
-                        <form class="like-forms d-inline" data-article-id="{{ article.pk }}">
-                          {% csrf_token %}
+                        <div class="like-forms d-inline" data-article-id="{{ article.pk }}">
                           {% if request.user in article.like_users.all %}
-                            <button type="submit" id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></button>
+                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></i>
                           {% else %}
-                            <button type="submit" id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></button>
+                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></button>
                           {% endif %}
-                        </form>
+                        </div>
                         <span id="like-{{ article.pk }}-count" class="text-muted me-3">{{ article.like_users.count }}</span>
                       {% endif %}
 
@@ -216,13 +214,13 @@
 
                     <div>
                       {% if request.user.is_authenticated %}
-                        <form class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
+                        <div class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
                           {% if request.user in article.bookmark_users.all %}
-                            <button type="submit" id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></button>
+                            <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></i>
                           {% else %}
-                            <button type="submit" id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></button>
+                            <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></i>
                           {% endif %}
-                        </form>
+                        </div>
                       {% endif %}
                     </div>
                   </div>
@@ -279,14 +277,14 @@
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="text-muted fs-6">
                         {% if request.user.is_authenticated %}
-                          <form class="like-forms d-inline" data-article-id="{{ article.pk }}">
+                          <div class="like-forms d-inline" data-article-id="{{ article.pk }}">
                             {% csrf_token %}
                             {% if request.user in article.like_users.all %}
-                              <button type="submit" id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></button>
+                              <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></i>
                             {% else %}
-                              <button type="submit" id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></button>
+                              <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></i>
                             {% endif %}
-                          </form>
+                          </div>
                           <span id="like-{{ article.pk }}-count" class="text-muted me-3">{{ article.like_users.count }}</span>
                         {% endif %}
 
@@ -300,13 +298,13 @@
 
                       <div>
                         {% if request.user.is_authenticated %}
-                          <form class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
+                          <div class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
                             {% if request.user in article.bookmark_users.all %}
-                              <button type="submit" id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></button>
+                              <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></i>
                             {% else %}
-                              <button type="submit" id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></button>
+                              <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></i>
                             {% endif %}
-                          </form>
+                          </div>
                         {% endif %}
                       </div>
                     </div>
@@ -388,70 +386,6 @@
     bookmark_articles.addEventListener('show.bs.collapse', event => {
       userCollapse.hide()
       likeCollapse.hide()
-    })
-
-    // 좋아요
-    const likeForms = document.querySelectorAll('.like-forms')
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value
-    likeForms.forEach(form => {
-      form.addEventListener('submit', event => {
-        event.preventDefault()
-        const articleId = event.target.dataset.articleId
-
-        axios({
-          method: 'post',
-          url: `/${articleId}/like/`,
-          headers: {'X-CSRFToken': csrfToken},
-        })
-        .then(response => {
-          const isLiked = response.data.isLiked
-          const likeBtn = document.querySelector(`#btn-like-${articleId}`)
-
-          if (isLiked === true) {
-            likeBtn.classList.add('bi-heart-fill', 'text-danger')
-            likeBtn.classList.remove('bi-heart')
-          } else {
-            likeBtn.classList.add('bi-heart')
-            likeBtn.classList.remove('bi-heart-fill', 'text-danger')
-          }
-
-          const likeCount = document.querySelector(`#like-${articleId}-count`)
-          likeCount.innerText = response.data.likeCount
-        })
-        .catch(error => {
-          console.log(error)
-        })
-      })
-    })
-
-    // 북마크
-    const bookmarkForms = document.querySelectorAll('.bookmark-forms')
-    bookmarkForms.forEach(form => {
-      form.addEventListener('submit', event => {
-        event.preventDefault()
-        const articleId = event.target.dataset.articleId
-
-        axios({
-          method: 'post',
-          url: `/${articleId}/bookmark/`,
-          headers: {'X-CSRFToken': csrfToken},
-        })
-        .then(response => {
-          const isBookmarked = response.data.isBookmarked
-          const bookmarkBtn = document.querySelector(`#btn-bookmark-${articleId}`)
-
-          if (isBookmarked === true) {
-            bookmarkBtn.classList.add('bi-bookmark-fill')
-            bookmarkBtn.classList.remove('bi-bookmark')
-          } else {
-            bookmarkBtn.classList.add('bi-bookmark')
-            bookmarkBtn.classList.remove('bi-bookmark-fill')
-          }
-        })
-        .catch(error => {
-          console.log(error)
-        })
-      })
     })
   </script>
 {% endblock script %}
