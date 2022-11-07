@@ -24,4 +24,5 @@ urlpatterns = [
         name="comment_like",
     ),
     path("search/", views.search, name="search"),
+    path("roulette/", views.roulette, name="roulette"),
 ]

@@ -317,3 +317,7 @@ def search(request):
     }
 
     return render(request, "articles/search.html", context)
+
+
+def roulette(request):
+    return render(request, "articles/roulette.html")
