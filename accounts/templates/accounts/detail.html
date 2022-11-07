@@ -198,7 +198,7 @@
                           {% if request.user in article.like_users.all %}
                             <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></i>
                           {% else %}
-                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></button>
+                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></i>
                           {% endif %}
                         </div>
                         <span id="like-{{ article.pk }}-count" class="text-muted me-3">{{ article.like_users.count }}</span>
@@ -237,7 +237,7 @@
       <div class="collapse" id="bookmark_articles">
         <div class="row">
           {% for article in bookmark_articles %}
-            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3" id="bookmark-{{ article.pk }}">
               <a href="{% url 'articles:detail' article.pk %}">
                 <div class="card glow">
                   <!-- 첫 번째 이미지를 썸네일로 -->
@@ -278,7 +278,6 @@
                       <div class="text-muted fs-6">
                         {% if request.user.is_authenticated %}
                           <div class="like-forms d-inline" data-article-id="{{ article.pk }}">
-                            {% csrf_token %}
                             {% if request.user in article.like_users.all %}
                               <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></i>
                             {% else %}
@@ -371,21 +370,31 @@
     const likeCollapse = new bootstrap.Collapse('#like_articles', {
       toggle: false
     })
-    const bookmarkCollapse = new bootstrap.Collapse('#bookmark_articles', {
-      toggle: false
-    })
+
+    if (bookmark_articles) {
+      const bookmarkCollapse = new bootstrap.Collapse('#bookmark_articles', {
+        toggle: false
+      })
     
-    user_articles.addEventListener('show.bs.collapse', event => {
-      likeCollapse.hide()
-      bookmarkCollapse.hide()
-    })
-    like_articles.addEventListener('show.bs.collapse', event => {
-      userCollapse.hide()
-      bookmarkCollapse.hide()
-    })
-    bookmark_articles.addEventListener('show.bs.collapse', event => {
-      userCollapse.hide()
-      likeCollapse.hide()
-    })
+      user_articles.addEventListener('show.bs.collapse', event => {
+        likeCollapse.hide()
+        bookmarkCollapse.hide()
+      })
+      like_articles.addEventListener('show.bs.collapse', event => {
+        userCollapse.hide()
+        bookmarkCollapse.hide()
+      })
+      bookmark_articles.addEventListener('show.bs.collapse', event => {
+        userCollapse.hide()
+        likeCollapse.hide()
+      })
+    } else {
+      user_articles.addEventListener('show.bs.collapse', event => {
+        likeCollapse.hide()
+      })
+      like_articles.addEventListener('show.bs.collapse', event => {
+        userCollapse.hide()
+      })
+    }
   </script>
 {% endblock script %}
