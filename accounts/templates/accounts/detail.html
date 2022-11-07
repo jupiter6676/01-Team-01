@@ -2,18 +2,6 @@
 {% load django_bootstrap5 %}
 {% load static %}
 
-{% block css %}
-  <style>
-    .hashtags, .card-title-text {
-      width: 100%;
-      min-height: 24px;
-      text-overflow: ellipsis;
-      white-space: nowrap;  
-      overflow: hidden;
-    }
-  </style>
-{% endblock css %}
-
 {% block content %}
   <h1 class="text-center my-5">
     <span class="text-primary">{{ user.nickname }}</span>님의 페이지</h1>
@@ -59,7 +47,10 @@
         <div class="d-flex justify-content-between mb-4">
           <div>
             <a id="link_user_articles" data-bs-toggle="collapse" href="#user_articles" role="button" aria-expanded="false" aria-controls="collapseExample" class="me-3">내 게시글</a>
-            <a id="link_like_articles" data-bs-toggle="collapse" href="#like_articles" role="button" aria-expanded="false" aria-controls="collapseExample">좋아요</a>
+            <a id="link_like_articles" data-bs-toggle="collapse" href="#like_articles" role="button" aria-expanded="false" aria-controls="collapseExample" class="me-3">좋아요</a>
+            {% if user == request.user %}
+              <a id="link_bookmark_articles" data-bs-toggle="collapse" href="#bookmark_articles" role="button" aria-expanded="false" aria-controls="collapseExample">북마크</a>
+            {% endif %}
           </div>
           
           <p class="text-muted m-0">
@@ -75,7 +66,6 @@
     </div>
   </div>
 
-
   <!-- 글 목록 -->
   <div>
     <!-- 작성한 글 -->
@@ -84,14 +74,14 @@
         {% for article in articles %}
           <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3">
             <a href="{% url 'articles:detail' article.pk %}">
-              <div class="card">
+              <div class="card glow">
                 <!-- 첫 번째 이미지를 썸네일로 -->
                 {% if article.photo_set.all.0.image %}
-                  <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="240px">
+                  <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="300px">
                 {% else %}
-                  <img src="https://dummyimage.com/1200x960/000000/c4c4c4" class="card-img-top" height="240px">
+                  <img src="https://dummyimage.com/1200x960/000000/c4c4c4" class="card-img-top" height="300px">
                 {% endif %}
-    
+
                 <div class="card-body d-flex flex-column justify-content-between" style="height: 12rem">
                   <!-- 유저 -->
                   <div class="mb-2">
@@ -104,30 +94,53 @@
                       <span class="ms-2">{{ article.user.nickname }}</span>
                     </a>
                   </div>
-    
-                  <a href="{% url 'articles:detail' article.pk %}" class="text-dark">
-                    <h4 class="card-title mb-3">{{ article.title }}</h4>
-                  </a>
-    
+
+                  <h5 class="card-title card-title-text mb-2">{{ article.title }}</h5>
+                  <div class="d-flex align-items-center mb-2">
+                    <!-- <svg width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2.31055C6.81525 2.31194 5.67942 2.78321 4.84166 3.62096C4.00391 4.45871 3.53265 5.59454 3.53125 6.7793C3.52984 7.74748 3.84609 8.6894 4.4315 9.46055C4.4315 9.46055 4.55338 9.62102 4.57329 9.64417L8 13.6855L11.4283 9.64214C11.4462 9.62061 11.5685 9.46055 11.5685 9.46055L11.5689 9.45933C12.154 8.68851 12.4701 7.74704 12.4688 6.7793C12.4674 5.59454 11.9961 4.45871 11.1583 3.62096C10.3206 2.78321 9.18476 2.31194 8 2.31055ZM9.4625 8.81055L8 7.87983L6.5375 8.81055L6.78125 7.15548L5.5625 6.03708L7.26875 5.83111L8 4.3418L8.77675 5.83152L10.4375 6.03708L9.21875 7.15548L9.4625 8.81055Z" fill="#0060FF"></path></svg>-->
+                    <i class="bi bi-geo-alt-fill fs-6 text-primary"></i>
+                    <span class="fs-6 text-primary ms-1 location">{{article.location}}</span>
+                  </div>
+
                   <div class="hashtags col-lg-8 col-md-10 mb-2">
                     {% for tag in article.tags.all %}
-                      <a href="/search/?search_option=hashtag&amp;search={{ tag.name }}" class="text-decoration-none fs-5">#{{ tag.name }}</a>
+                      <a href="/search/?search_option=hashtag&amp;search={{ tag.name }}" class="text-decoration-none fs-6">#{{ tag.name }}</a>
                     {% endfor %}
                   </div>
-    
-                  <!-- 좋아요, 댓글, 조회수 -->
-                  <div class="text-muted fs-5">
-                    <span class="bi bi-heart me-3">
-                      <span class="">{{ article.like_users.count }}</span>
-                    </span>
-                    <span class="bi bi-chat-dots-fill me-3"> 
-                      <span class="">{{ article.comment_set.all.count }}</span>
-                    </span>
-                    <span class="bi bi-eye-fill"> 
-                      <span class="">{{ article.view_count }}</span>
-                      <span class=""></span>
 
-                    </span>
+                  <!-- 좋아요, 댓글, 조회수, 북마크 -->
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted fs-6">
+                      {% if request.user.is_authenticated %}
+                        <div class="like-forms d-inline" data-article-id="{{ article.pk }}">
+                          {% if request.user in article.like_users.all %}
+                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></i>
+                          {% else %}
+                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></i>
+                          {% endif %}
+                        </div>
+                        <span id="like-{{ article.pk }}-count" class="text-muted me-3">{{ article.like_users.count }}</span>
+                      {% endif %}
+
+                      <span class="bi bi-chat-dots-fill me-3"> 
+                        <span class="">{{ article.comment_set.all.count }}</span>
+                      </span>
+                      <span class="bi bi-eye-fill"> 
+                        <span class="">{{ article.view_count }}</span>
+                      </span>
+                    </div>
+
+                    <div>
+                      {% if request.user.is_authenticated %}
+                        <div class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
+                          {% if request.user in article.bookmark_users.all %}
+                            <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></i>
+                          {% else %}
+                            <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></i>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -141,16 +154,16 @@
     <div class="collapse" id="like_articles">
       <div class="row">
         {% for article in like_articles %}
-          <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3">
+          <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3" id="like-{{ article.pk }}">
             <a href="{% url 'articles:detail' article.pk %}">
-              <div class="card">
+              <div class="card glow">
                 <!-- 첫 번째 이미지를 썸네일로 -->
                 {% if article.photo_set.all.0.image %}
-                  <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="240px">
+                  <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="300px">
                 {% else %}
-                  <img src="https://dummyimage.com/1200x960/000000/c4c4c4" class="card-img-top" height="240px">
+                  <img src="https://dummyimage.com/1200x960/000000/c4c4c4" class="card-img-top" height="300px">
                 {% endif %}
-    
+
                 <div class="card-body d-flex flex-column justify-content-between" style="height: 12rem">
                   <!-- 유저 -->
                   <div class="mb-2">
@@ -163,29 +176,53 @@
                       <span class="ms-2">{{ article.user.nickname }}</span>
                     </a>
                   </div>
-    
-                  <a href="{% url 'articles:detail' article.pk %}" class="text-dark">
-                    <h4 class="card-title mb-3">{{ article.title }}</h4>
-                  </a>
-    
+
+                  <h5 class="card-title card-title-text mb-2">{{ article.title }}</h5>
+                  <div class="d-flex align-items-center mb-2">
+                    <!-- <svg width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2.31055C6.81525 2.31194 5.67942 2.78321 4.84166 3.62096C4.00391 4.45871 3.53265 5.59454 3.53125 6.7793C3.52984 7.74748 3.84609 8.6894 4.4315 9.46055C4.4315 9.46055 4.55338 9.62102 4.57329 9.64417L8 13.6855L11.4283 9.64214C11.4462 9.62061 11.5685 9.46055 11.5685 9.46055L11.5689 9.45933C12.154 8.68851 12.4701 7.74704 12.4688 6.7793C12.4674 5.59454 11.9961 4.45871 11.1583 3.62096C10.3206 2.78321 9.18476 2.31194 8 2.31055ZM9.4625 8.81055L8 7.87983L6.5375 8.81055L6.78125 7.15548L5.5625 6.03708L7.26875 5.83111L8 4.3418L8.77675 5.83152L10.4375 6.03708L9.21875 7.15548L9.4625 8.81055Z" fill="#0060FF"></path></svg>-->
+                    <i class="bi bi-geo-alt-fill fs-6 text-primary"></i>
+                    <span class="fs-6 text-primary ms-1 location">{{article.location}}</span>
+                  </div>
+
                   <div class="hashtags col-lg-8 col-md-10 mb-2">
                     {% for tag in article.tags.all %}
-                      <a href="/search/?search_option=hashtag&amp;search={{ tag.name }}" class="text-decoration-none fs-5">#{{ tag.name }}</a>
+                      <a href="/search/?search_option=hashtag&amp;search={{ tag.name }}" class="text-decoration-none fs-6">#{{ tag.name }}</a>
                     {% endfor %}
                   </div>
-    
-                  <!-- 좋아요, 댓글, 조회수 -->
-                  <div class="text-muted fs-5">
-                    <span class="bi bi-heart me-3">
-                      <span class="">{{ article.like_users.count }}</span>
-                    </span>
-                    <span class="bi bi-chat-dots-fill me-3"> 
-                      <span class="">{{ article.comment_set.all.count }}</span>
-                    </span>
-                    <span class="bi bi-eye-fill"> 
-                      <span class="">{{ article.view_count }}</span>
-                      <span class=""></span>
-                    </span>
+
+                  <!-- 좋아요, 댓글, 조회수, 북마크 -->
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted fs-6">
+                      {% if request.user.is_authenticated %}
+                        <div class="like-forms d-inline" data-article-id="{{ article.pk }}">
+                          {% if request.user in article.like_users.all %}
+                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></i>
+                          {% else %}
+                            <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></i>
+                          {% endif %}
+                        </div>
+                        <span id="like-{{ article.pk }}-count" class="text-muted me-3">{{ article.like_users.count }}</span>
+                      {% endif %}
+
+                      <span class="bi bi-chat-dots-fill me-3"> 
+                        <span class="">{{ article.comment_set.all.count }}</span>
+                      </span>
+                      <span class="bi bi-eye-fill"> 
+                        <span class="">{{ article.view_count }}</span>
+                      </span>
+                    </div>
+
+                    <div>
+                      {% if request.user.is_authenticated %}
+                        <div class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
+                          {% if request.user in article.bookmark_users.all %}
+                            <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></i>
+                          {% else %}
+                            <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></i>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -194,13 +231,96 @@
         {% endfor %}
       </div>
     </div>
+
+    <!-- 북마크한 글 -->
+    {% if user == request.user %}
+      <div class="collapse" id="bookmark_articles">
+        <div class="row">
+          {% for article in bookmark_articles %}
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3" id="bookmark-{{ article.pk }}">
+              <a href="{% url 'articles:detail' article.pk %}">
+                <div class="card glow">
+                  <!-- 첫 번째 이미지를 썸네일로 -->
+                  {% if article.photo_set.all.0.image %}
+                    <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="300px">
+                  {% else %}
+                    <img src="https://dummyimage.com/1200x960/000000/c4c4c4" class="card-img-top" height="300px">
+                  {% endif %}
+
+                  <div class="card-body d-flex flex-column justify-content-between" style="height: 12rem">
+                    <!-- 유저 -->
+                    <div class="mb-2">
+                      <a href="{% url 'accounts:detail' article.user.pk %}" class="text-dark">
+                        {% if article.user.profile.image %}
+                          <img src="{{ article.user.profile.image.url }}" alt="{{ article.user.profile.image }}" class="rounded-2 border border-1" width="40px">
+                        {% else %}
+                          <img src="{% static 'images/dummy-image-square.jpg' %}" alt="" class="rounded-2 border border-1" width="40px">
+                        {% endif %}
+                        <span class="ms-2">{{ article.user.nickname }}</span>
+                      </a>
+                    </div>
+
+                    <h5 class="card-title card-title-text mb-2">{{ article.title }}</h5>
+                    <div class="d-flex align-items-center mb-2">
+                      <!-- <svg width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2.31055C6.81525 2.31194 5.67942 2.78321 4.84166 3.62096C4.00391 4.45871 3.53265 5.59454 3.53125 6.7793C3.52984 7.74748 3.84609 8.6894 4.4315 9.46055C4.4315 9.46055 4.55338 9.62102 4.57329 9.64417L8 13.6855L11.4283 9.64214C11.4462 9.62061 11.5685 9.46055 11.5685 9.46055L11.5689 9.45933C12.154 8.68851 12.4701 7.74704 12.4688 6.7793C12.4674 5.59454 11.9961 4.45871 11.1583 3.62096C10.3206 2.78321 9.18476 2.31194 8 2.31055ZM9.4625 8.81055L8 7.87983L6.5375 8.81055L6.78125 7.15548L5.5625 6.03708L7.26875 5.83111L8 4.3418L8.77675 5.83152L10.4375 6.03708L9.21875 7.15548L9.4625 8.81055Z" fill="#0060FF"></path></svg>-->
+                      <i class="bi bi-geo-alt-fill fs-6 text-primary"></i>
+                      <span class="fs-6 text-primary ms-1 location">{{article.location}}</span>
+                    </div>
+
+                    <div class="hashtags col-lg-8 col-md-10 mb-2">
+                      {% for tag in article.tags.all %}
+                        <a href="/search/?search_option=hashtag&amp;search={{ tag.name }}" class="text-decoration-none fs-6">#{{ tag.name }}</a>
+                      {% endfor %}
+                    </div>
+
+                    <!-- 좋아요, 댓글, 조회수, 북마크 -->
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="text-muted fs-6">
+                        {% if request.user.is_authenticated %}
+                          <div class="like-forms d-inline" data-article-id="{{ article.pk }}">
+                            {% if request.user in article.like_users.all %}
+                              <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></i>
+                            {% else %}
+                              <i id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></i>
+                            {% endif %}
+                          </div>
+                          <span id="like-{{ article.pk }}-count" class="text-muted me-3">{{ article.like_users.count }}</span>
+                        {% endif %}
+
+                        <span class="bi bi-chat-dots-fill me-3"> 
+                          <span class="">{{ article.comment_set.all.count }}</span>
+                        </span>
+                        <span class="bi bi-eye-fill"> 
+                          <span class="">{{ article.view_count }}</span>
+                        </span>
+                      </div>
+
+                      <div>
+                        {% if request.user.is_authenticated %}
+                          <div class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
+                            {% if request.user in article.bookmark_users.all %}
+                              <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></i>
+                            {% else %}
+                              <i id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></i>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
   </div>
 {% endblock content %}
 
 {% block script %}
   <script>
     const form = document.querySelector("#follow-form")
-
     if (form) {
       const csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value
       form.addEventListener('submit', function (event) {
@@ -239,21 +359,42 @@
 
     const link_user_articles = document.querySelector('#link_user_articles')
     const link_like_articles = document.querySelector('#link_like_articles')
+    const link_bookmark_articles = document.querySelector('#link_bookmark_articles')
     const user_articles = document.querySelector('#user_articles')
     const like_articles = document.querySelector('#like_articles')
+    const bookmark_articles = document.querySelector('#bookmark_articles')
 
-    const bsCollapse = new bootstrap.Collapse('#like_articles', {
+    const userCollapse = new bootstrap.Collapse('#user_articles', {
       toggle: false
     })
-    const bsCollapse2 = new bootstrap.Collapse('#user_articles', {
+    const likeCollapse = new bootstrap.Collapse('#like_articles', {
       toggle: false
     })
+
+    if (bookmark_articles) {
+      const bookmarkCollapse = new bootstrap.Collapse('#bookmark_articles', {
+        toggle: false
+      })
     
-    user_articles.addEventListener('show.bs.collapse', event => {
-      bsCollapse.hide()
-    })
-    like_articles.addEventListener('show.bs.collapse', event => {
-      bsCollapse2.hide()
-    })
+      user_articles.addEventListener('show.bs.collapse', event => {
+        likeCollapse.hide()
+        bookmarkCollapse.hide()
+      })
+      like_articles.addEventListener('show.bs.collapse', event => {
+        userCollapse.hide()
+        bookmarkCollapse.hide()
+      })
+      bookmark_articles.addEventListener('show.bs.collapse', event => {
+        userCollapse.hide()
+        likeCollapse.hide()
+      })
+    } else {
+      user_articles.addEventListener('show.bs.collapse', event => {
+        likeCollapse.hide()
+      })
+      like_articles.addEventListener('show.bs.collapse', event => {
+        userCollapse.hide()
+      })
+    }
   </script>
 {% endblock script %}

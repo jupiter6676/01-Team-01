@@ -1,18 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block css %}
-  <style>
-    .hashtags, .card-title-text, .location {
-      width: 100%;
-      min-height: 24px;
-      text-overflow: ellipsis;
-      white-space: nowrap;  
-      overflow: hidden;
-    }
-  </style>
-{% endblock css %}
-
 {% block content %}
   <div class="d-flex justify-content-center align-items-center">
     <h1 class="mt-5">🌍🚂🛫🛬🧳🚀</h1>
@@ -32,11 +20,11 @@
     </div>
   </form>
 
-  <div class="row">
+  <div class="row pb-5">
     {% for article in search_articles %}
       <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3">
         <a href="{% url 'articles:detail' article.pk %}">
-          <div class="card">
+          <div class="card glow">
             <!-- 첫 번째 이미지를 썸네일로 -->
             {% if article.photo_set.all.0.image %}
               <img src="{{ article.photo_set.all.0.image.url }}" class="card-img-top" alt="..." height="300px">
@@ -70,17 +58,40 @@
                 {% endfor %}
               </div>
 
-              <!-- 좋아요, 댓글, 조회수 -->
-              <div class="text-muted fs-6">
-                <span class="bi bi-heart me-3">
-                  <span class="">{{ article.like_users.count }}</span>
-                </span>
-                <span class="bi bi-chat-dots-fill me-3"> 
-                  <span class="">{{ article.comment_set.all.count }}</span>
-                </span>
-                <span class="bi bi-eye-fill"> 
-                  <span class="">{{ article.view_count }}</span>
-                </span>
+              <!-- 좋아요, 댓글, 조회수, 북마크 -->
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted fs-6">
+                  {% if request.user.is_authenticated %}
+                    <form class="like-forms d-inline" data-article-id="{{ article.pk }}">
+                      {% csrf_token %}
+                      {% if request.user in article.like_users.all %}
+                        <button type="submit" id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart-fill text-danger"></button>
+                      {% else %}
+                        <button type="submit" id="btn-like-{{ article.pk }}" class="btn-none bi bi-heart"></button>
+                      {% endif %}
+                    </form>
+                    <span id="like-{{ article.pk }}-count" class="text-muted me-3">{{ article.like_users.count }}</span>
+                  {% endif %}
+
+                  <span class="bi bi-chat-dots-fill me-3"> 
+                    <span class="">{{ article.comment_set.all.count }}</span>
+                  </span>
+                  <span class="bi bi-eye-fill"> 
+                    <span class="">{{ article.view_count }}</span>
+                  </span>
+                </div>
+
+                <div>
+                  {% if request.user.is_authenticated %}
+                    <form class="bookmark-forms d-inline" data-article-id="{{ article.pk }}">
+                      {% if request.user in article.bookmark_users.all %}
+                        <button type="submit" id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark-fill"></button>
+                      {% else %}
+                        <button type="submit" id="btn-bookmark-{{ article.pk }}" data-article-id="{{ article.pk }}" class="btn-none bi bi-bookmark"></button>
+                      {% endif %}
+                    </form>
+                  {% endif %}
+                </div>
               </div>
             </div>
           </div>
@@ -95,3 +106,71 @@
     {% endif %}
   </div>
 {% endblock content %}
+
+{% block script %}
+  <script>
+    // 좋아요
+    const likeForms = document.querySelectorAll('.like-forms')
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value
+    likeForms.forEach(form => {
+      form.addEventListener('submit', event => {
+        event.preventDefault()
+        const articleId = event.target.dataset.articleId
+
+        axios({
+          method: 'post',
+          url: `/${articleId}/like/`,
+          headers: {'X-CSRFToken': csrfToken},
+        })
+        .then(response => {
+          const isLiked = response.data.isLiked
+          const likeBtn = document.querySelector(`#btn-like-${articleId}`)
+
+          if (isLiked === true) {
+            likeBtn.classList.add('bi-heart-fill', 'text-danger')
+            likeBtn.classList.remove('bi-heart')
+          } else {
+            likeBtn.classList.add('bi-heart')
+            likeBtn.classList.remove('bi-heart-fill', 'text-danger')
+          }
+
+          const likeCount = document.querySelector(`#like-${articleId}-count`)
+          likeCount.innerText = response.data.likeCount
+        })
+        .catch(error => {
+          console.log(error)
+        })
+      })
+    })
+
+    // 북마크
+    const bookmarkForms = document.querySelectorAll('.bookmark-forms')
+    bookmarkForms.forEach(form => {
+      form.addEventListener('submit', event => {
+        event.preventDefault()
+        const articleId = event.target.dataset.articleId
+
+        axios({
+          method: 'post',
+          url: `/${articleId}/bookmark/`,
+          headers: {'X-CSRFToken': csrfToken},
+        })
+        .then(response => {
+          const isBookmarked = response.data.isBookmarked
+          const bookmarkBtn = document.querySelector(`#btn-bookmark-${articleId}`)
+
+          if (isBookmarked === true) {
+            bookmarkBtn.classList.add('bi-bookmark-fill')
+            bookmarkBtn.classList.remove('bi-bookmark')
+          } else {
+            bookmarkBtn.classList.add('bi-bookmark')
+            bookmarkBtn.classList.remove('bi-bookmark-fill')
+          }
+        })
+        .catch(error => {
+          console.log(error)
+        })
+      })
+    })
+  </script>
+{% endblock script %}

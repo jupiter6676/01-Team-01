@@ -27,6 +27,7 @@ body {
     box-shadow: 0px 0px 15px rgb(79 133 197 / 52%);
 }
 
+
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 
 canvas {
@@ -140,3 +141,17 @@ canvas {
   left: calc(50% - 16px);
   z-index: 22;
 }
+
+.hashtags, .card-title-text, .location {
+    width: 100%;
+    min-height: 24px;
+    text-overflow: ellipsis;
+    white-space: nowrap;  
+    overflow: hidden;
+  }
+
+  .btn-none {
+    border: 0;
+    padding: 0;
+    background-color: white;
+  }
